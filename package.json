@@ -16,6 +16,7 @@
     "secrets:sync": "bw sync && bw get item 04740009-37d7-4acf-9ac3-acab003531c3 | fx .notes > \".env.local\""
   },
   "dependencies": {
+    "mongodb": "^3.6.4",
     "next": "10.0.5",
     "react": "17.0.1",
     "react-dom": "17.0.1"
@@ -28,6 +29,7 @@
     "@types/enzyme": "^3.10.8",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jest": "^26.0.20",
+    "@types/mongodb": "^3.6.6",
     "@types/node": "^14.0.6",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
