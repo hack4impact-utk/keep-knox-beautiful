@@ -5,7 +5,6 @@ import { ObjectID } from "mongodb";
 export interface User {
   _id?: ObjectID;
   email?: string;
-  password?: string;
   name?: string;
   phone?: string;
   filledForm?: boolean;
