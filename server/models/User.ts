@@ -15,7 +15,7 @@ export const VolunteerSchema = new Schema({
         required: false,
     },
     filledForm: {
-        type: String,
+        type: Boolean,
         required: true,
     },
     attendedEvents: {
