@@ -1,5 +1,6 @@
 import { model, models, Model, Schema, Document } from "mongoose";
-import { Event, Volunteer } from "utils/types";
+import { Volunteer } from "utils/types";
+import EventSchema from "server/models/Event";
 
 export const VolunteerSchema = new Schema({
     email: {
@@ -19,11 +20,11 @@ export const VolunteerSchema = new Schema({
         required: true,
     },
     attendedEvents: {
-        type: [Event],
+        type: [EventSchema],
         required: false,
     },
     signedUpEvents: {
-        type: [Event],
+        type: [EventSchema],
         required: false,
     },
 });
