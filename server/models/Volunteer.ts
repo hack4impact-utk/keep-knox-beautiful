@@ -1,6 +1,6 @@
 import { model, models, Model, Schema, Document } from "mongoose";
 import { Volunteer } from "utils/types";
-import EventSchema from "server/models/Event";
+import { EventSchema } from "server/models/Event";
 
 export const VolunteerSchema = new Schema({
     email: {
