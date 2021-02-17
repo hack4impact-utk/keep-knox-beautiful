@@ -1,5 +1,5 @@
-import { getAlteredUsername, addVolunteer } from "server/actions/User";
-import VolunteerSchema from "server/models/Event";
+import { getAlteredUsername, addVolunteer } from "server/actions/Volunteer";
+import VolunteerSchema from "server/models/Volunteer";
 import { Volunteer } from "utils/types";
 
 jest.mock("server");
@@ -20,7 +20,7 @@ describe("addUser() tests", () => {
         const mockVol: Volunteer = {
             email: "test",
             name: "test",
-            phone: "123-123-test",
+            phone: "123-123-1234",
             filledForm: false,
             // attendedEvents and signedUpEvents default to empty arrays in mongoose
         };

@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import errors from "utils/errors";
 import formidable from "formidable";
 import { Volunteer } from "utils/types";
-import { addVolunteer } from "server/actions/User";
+import { addVolunteer } from "server/actions/Volunteer";
 
 // formidable config
 export const config = {

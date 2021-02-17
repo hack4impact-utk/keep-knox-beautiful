@@ -1,5 +1,5 @@
 import mongoDB from "../index";
-import VolunteerSchema from "../models/User";
+import VolunteerSchema from "../models/Volunteer";
 import { Volunteer } from "utils/types";
 
 export async function getAlteredUsername(username: string): Promise<string> {
