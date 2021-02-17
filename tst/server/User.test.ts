@@ -1,7 +1,6 @@
-import { addEvent } from "server/actions/Event";
 import { getAlteredUsername, addVolunteer } from "server/actions/User";
 import VolunteerSchema from "server/models/Event";
-import { Event, Volunteer } from "utils/types";
+import { Volunteer } from "utils/types";
 
 jest.mock("server");
 
