@@ -1,6 +1,7 @@
 import mongoDB from "../index";
 import EventSchema from "../models/Event";
 import { Event } from "utils/types";
+import { mongo } from "mongoose";
 
 /**
  * @param id EventId string to identify an event in our database.
@@ -18,6 +19,20 @@ export const getEvent = async function (id: string) {
     }
 
     return event;
+};
+
+/**
+ * @returns All events.
+ */
+export const getEvents = async function () {
+    await mongoDB();
+
+    const events = (await EventSchema.find({})) as Array<Event>;
+    if (events == null) {
+        throw new Error("No events");
+    }
+
+    return events;
 };
 
 /**
