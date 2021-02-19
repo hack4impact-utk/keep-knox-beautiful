@@ -1,7 +1,6 @@
 import mongoDB from "../index";
 import EventSchema from "../models/Event";
 import { Event } from "utils/types";
-import { mongo } from "mongoose";
 
 /**
  * @param id EventId string to identify an event in our database.
