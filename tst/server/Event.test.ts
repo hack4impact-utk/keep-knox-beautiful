@@ -71,3 +71,38 @@ describe("addEvent() tests", () => {
         expect(EventSchema.create).toHaveBeenCalledTimes(1);
     });
 });
+
+describe("deleteEvent() tests", () => {
+    test("valid event", async () => {
+        const mockEvent = {
+            name: "test",
+        };
+
+        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
+        await expect(getEvent("602734007d7de15fae321153")).resolves.toEqual(mockEvent);
+    });
+
+    test("invalid parameters", async () => {
+        expect.assertions(1);
+        await expect(getEvent("")).rejects.toThrowError("Invalid id");
+    });
+
+    test("no event with that id", async () => {
+        expect.assertions(1);
+        // mongoose returns undefined when a query results in no results
+        const mockEvent = undefined;
+
+        //mock EventSchema.findById to return mockEvent, which will then throw an error
+        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
+        await expect(getEvent("602734007d7de15fae321152")).rejects.toThrowError("Event does not exist");
+    });
+
+    test("event deleted", async () => {
+        const mockEvent = {
+            name: "test",
+        };
+
+        EventSchema.findByIdAndDelete = jest.fn().mockResolvedValue(mockEvent);
+        await expect(getEvent("602734007d7de15fae321152")).rejects.toThrowError("Event does not exist");
+    });
+});
