@@ -1,4 +1,5 @@
-import { getEvent, getEvents, addEvent } from "server/actions/Event";
+import { ObjectId } from "mongodb";
+import { getEvent, getEvents, addEvent, deleteEvent } from "server/actions/Event";
 import EventSchema from "server/models/Event";
 import { Event } from "utils/types";
 
@@ -73,28 +74,9 @@ describe("addEvent() tests", () => {
 });
 
 describe("deleteEvent() tests", () => {
-    test("valid event", async () => {
-        const mockEvent = {
-            name: "test",
-        };
-
-        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
-        await expect(getEvent("602734007d7de15fae321153")).resolves.toEqual(mockEvent);
-    });
-
     test("invalid parameters", async () => {
         expect.assertions(1);
-        await expect(getEvent("")).rejects.toThrowError("Invalid id");
-    });
-
-    test("no event with that id", async () => {
-        expect.assertions(1);
-        // mongoose returns undefined when a query results in no results
-        const mockEvent = undefined;
-
-        //mock EventSchema.findById to return mockEvent, which will then throw an error
-        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
-        await expect(getEvent("602734007d7de15fae321152")).rejects.toThrowError("Event does not exist");
+        await expect(deleteEvent("")).rejects.toThrowError("Invalid id");
     });
 
     test("event deleted", async () => {
@@ -102,7 +84,9 @@ describe("deleteEvent() tests", () => {
             name: "test",
         };
 
-        EventSchema.findByIdAndDelete = jest.fn().mockResolvedValue(mockEvent);
-        await expect(getEvent("602734007d7de15fae321152")).rejects.toThrowError("Event does not exist");
+        EventSchema.findByIdAndDelete = jest.fn().mockImplementation(async (event: Event) => event);
+        await deleteEvent("testid123");
+        expect(EventSchema.findByIdAndDelete).lastCalledWith("testid123");
+        expect(EventSchema.findByIdAndDelete).toHaveBeenCalledTimes(1);
     });
 });
