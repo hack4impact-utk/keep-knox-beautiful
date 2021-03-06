@@ -3,16 +3,11 @@ import VolunteerEventsList from "../../components/VolunteerEventsList";
 import Header from "src/components/Header";
 import Footer from "src/components/Footer";
 import { getVolunteer } from "server/actions/Volunteer";
-import { Event, Volunteer } from "utils/types";
+import { Volunteer } from "utils/types";
 import { GetStaticPropsContext, NextPage } from "next";
 import Error from "next/error";
 import constants from "utils/constants";
-import CoreTypography from "src/components/core/typography/CoreTypography";
-import colors from "src/components/core/colors";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import Container from "@material-ui/core/Container";
-import CardContent from "@material-ui/core/CardContent";
 
 interface Props {
     vol: Volunteer;
@@ -29,18 +24,21 @@ const useStyles = makeStyles((theme: Theme) =>
 const VolunteerPage: NextPage<Props> = ({ vol }) => {
     const classes = useStyles();
 
+    if (!vol) {
+        return <Error statusCode={404} />;
+    }
     return (
         <>
             <Header />
             <div className={classes.container}>
-                <VolunteerEventsList />
+                <VolunteerEventsList {...vol} />
             </div>
             <Footer />
         </>
     );
 };
 
-// query data and pass it to component here. this is run server-side
+// get volunteer data
 export async function getStaticProps(context: GetStaticPropsContext) {
     try {
         console.log(context.params?.volId);
@@ -60,7 +58,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     }
 }
 
-// required for dynamic pages: prerender events at build time
+// required for dynamic pages: prerender volunteers at build time
 export async function getStaticPaths() {
     const volunteers: Volunteer[] = []; //await getVolunteers({});
 
