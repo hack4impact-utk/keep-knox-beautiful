@@ -118,3 +118,85 @@ const useStyles = makeStyles((theme: Theme) =>
         },
     })
 );
+
+export default function EventSignUp() {
+    const styles = useStyles();
+
+    return (
+        <React.Fragment>
+            <Container className={styles.container}>
+                <Container className={styles.leftWrapper}>
+                    <CoreTypography variant="h1" className={styles.textWrapper}>
+                        Sign Up
+                    </CoreTypography>
+                    <CoreTypography variant="h2" className={styles.textWrapper}>
+                        We&#39;d love for you <br></br>to join us!
+                    </CoreTypography>
+                </Container>
+                <Container className={styles.rightWrapper}>
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        <label htmlFor="firstNameField">
+                            <CoreTypography variant="body1" className={styles.inputLabel}>
+                                First Name
+                            </CoreTypography>
+                        </label>
+                        <input type="text" name="firstName" required className={styles.input} id="firstNameField" />
+                        <label htmlFor="lastNameField">
+                            <CoreTypography variant="body1" className={styles.inputLabel} id="lastNameLabel">
+                                Last Name
+                            </CoreTypography>
+                        </label>
+                        <input type="text" name="lastName" required className={styles.input} id="lastNameField" />
+                        <label htmlFor="emailField">
+                            <CoreTypography variant="body1" className={styles.inputLabel} id="emailLabel">
+                                Email
+                            </CoreTypography>
+                        </label>
+                        <input type="text" name="email" required className={styles.input} id="emailField" />
+                        <label htmlFor="phoneNumberField">
+                            <CoreTypography variant="body1" className={styles.inputLabel} id="phoneNumberLabel">
+                                Phone Number
+                            </CoreTypography>
+                        </label>
+                        <input type="text" name="phoneNumber" className={styles.input} id="phoneNumberField" />
+                        <Container className={styles.waiverLinkWrapper}>
+                            <br></br>
+                            <DescriptionIcon htmlColor="gray" />
+                            &nbsp;
+                            <Link className={styles.waiverLink}>{constants.org.name.short} Volunteer Waiver</Link>
+                        </Container>
+                        <Container className={styles.waiverCheckboxWrapper}>
+                            <input
+                                type="checkbox"
+                                name="waiverCheckbox"
+                                required
+                                className={styles.waiverCheckbox}
+                                id="waiverCheckbox"
+                            />
+                            <label htmlFor="waiverCheckbox">
+                                <CoreTypography variant="body2" className={styles.checkboxText}>
+                                    By checking this box, I have read and acknowledged the waiver.
+                                </CoreTypography>
+                            </label>
+                        </Container>
+                        <Container>
+                            <input type="submit" value="Sign Up" className={styles.button} />
+                        </Container>
+                    </form>
+                </Container>
+            </Container>
+        </React.Fragment>
+    );
+
+    function handleSubmit() {
+        event?.preventDefault();
+
+        const firstName = (document.getElementById("firstNameField") as HTMLInputElement).value;
+        const lastName = (document.getElementById("lastNameField") as HTMLInputElement).value;
+        const email = (document.getElementById("emailField") as HTMLInputElement).value;
+        const phoneNumber = (document.getElementById("phoneNumberField") as HTMLInputElement).value;
+
+        const volunteer: Volunteer = { name: firstName + " " + lastName, email: email, phone: phoneNumber };
+        console.log(JSON.stringify(volunteer));
+    }
+}
