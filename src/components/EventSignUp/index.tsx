@@ -1,14 +1,14 @@
 import React from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
+import Container from "@material-ui/core/Container";
+import DescriptionIcon from "@material-ui/icons/Description";
+import Link from "@material-ui/core/Link";
 import CoreTypography from "src/components/core/typography";
 import colors from "src/components/core/colors";
-import Container from "@material-ui/core/Container";
-import Link from "@material-ui/core/Link";
 import constants from "utils/constants";
-import DescriptionIcon from "@material-ui/icons/Description";
 import { Volunteer } from "utils/types";
 
-const resizeThreshold = 720;
+// styles
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         container: {
@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) =>
             height: "auto",
             paddingLeft: "0",
 
-            [theme.breakpoints.between(0, resizeThreshold)]: {
+            [theme.breakpoints.between(0, 720)]: {
                 flexDirection: "column",
                 width: "375px",
             },
@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
             color: colors.white,
             paddingTop: "220px",
             height: "700px",
-            [theme.breakpoints.between(0, resizeThreshold)]: {
+            [theme.breakpoints.between(0, 720)]: {
                 width: "371px",
             },
         },
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme: Theme) =>
             width: "310px",
             height: "700px",
 
-            [theme.breakpoints.between(0, resizeThreshold)]: {
+            [theme.breakpoints.between(0, 720)]: {
                 width: "375",
                 textAlign: "center",
                 position: "relative",
@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
         textWrapper: {
             paddingBottom: "20px",
 
-            [theme.breakpoints.between(0, resizeThreshold)]: {
+            [theme.breakpoints.between(0, 720)]: {
                 paddingBottom: "35px",
             },
         },
@@ -79,10 +79,6 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingTop: "5px",
         },
 
-        waiverWrapper: {
-            paddingLeft: "0px",
-        },
-
         waiverLink: {
             color: colors.grays[80],
             cursor: "pointer",
@@ -96,10 +92,9 @@ const useStyles = makeStyles((theme: Theme) =>
 
         waiverCheckbox: {
             cursor: "pointer",
-            backgroundColor: "red",
         },
 
-        checkboxText: {
+        waiverCheckboxText: {
             width: "240px",
             paddingLeft: "10px",
             cursor: "pointer",
@@ -107,7 +102,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
         button: {
             marginTop: "25px",
-            marginLeft: "140px",
+            marginLeft: "160px",
             padding: "15px",
             backgroundColor: theme.palette.primary.main,
             border: "none",
@@ -118,6 +113,22 @@ const useStyles = makeStyles((theme: Theme) =>
         },
     })
 );
+
+// on sign-up button click
+const handleSubmit = () => {
+    // prevents passing raw field data through URL
+    event?.preventDefault();
+
+    // gets input field information
+    const firstName = (document.getElementById("firstNameField") as HTMLInputElement).value;
+    const lastName = (document.getElementById("lastNameField") as HTMLInputElement).value;
+    const email = (document.getElementById("emailField") as HTMLInputElement).value;
+    const phoneNumber = (document.getElementById("phoneNumberField") as HTMLInputElement).value;
+
+    // creates Volunteer object
+    const volunteer: Volunteer = { name: firstName + " " + lastName, email: email, phone: phoneNumber };
+    console.log(JSON.stringify(volunteer));
+};
 
 export default function EventSignUp() {
     const styles = useStyles();
@@ -174,29 +185,15 @@ export default function EventSignUp() {
                                 id="waiverCheckbox"
                             />
                             <label htmlFor="waiverCheckbox">
-                                <CoreTypography variant="body2" className={styles.checkboxText}>
+                                <CoreTypography variant="body2" className={styles.waiverCheckboxText}>
                                     By checking this box, I have read and acknowledged the waiver.
                                 </CoreTypography>
                             </label>
                         </Container>
-                        <Container>
-                            <input type="submit" value="Sign Up" className={styles.button} />
-                        </Container>
+                        <input type="submit" value="Sign Up" className={styles.button} />
                     </form>
                 </Container>
             </Container>
         </React.Fragment>
     );
-
-    function handleSubmit() {
-        event?.preventDefault();
-
-        const firstName = (document.getElementById("firstNameField") as HTMLInputElement).value;
-        const lastName = (document.getElementById("lastNameField") as HTMLInputElement).value;
-        const email = (document.getElementById("emailField") as HTMLInputElement).value;
-        const phoneNumber = (document.getElementById("phoneNumberField") as HTMLInputElement).value;
-
-        const volunteer: Volunteer = { name: firstName + " " + lastName, email: email, phone: phoneNumber };
-        console.log(JSON.stringify(volunteer));
-    }
 }
