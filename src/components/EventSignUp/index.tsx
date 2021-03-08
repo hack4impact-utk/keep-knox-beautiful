@@ -91,6 +91,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
 
         waiverCheckbox: {
+            marginTop: "15px",
             cursor: "pointer",
         },
 
