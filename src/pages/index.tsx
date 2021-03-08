@@ -1,18 +1,15 @@
 import React from "react";
 import { GetStaticPropsContext, NextPage } from "next";
-import Footer from "src/components/Footer";
-import EventsContainer from "src/components/EventsContainer";
-import Header from "src/components/Header";
-import DDate from "src/components/DummyDate";
-import urls from "utils/urls";
-
-import { Event } from "utils/types";
-import { useRouter } from "next/router";
 import withWidth from "@material-ui/core/withWidth";
+
+import { Button, Container, createStyles, Grid, makeStyles, Theme } from "@material-ui/core";
+import EventsContainer from "src/components/EventsContainer";
+import CoreTypography from "src/components/core/typography";
+
 import { getEvents } from "server/actions/Event";
 import constants from "utils/constants";
-import { Button, Container, createStyles, Grid, makeStyles, Theme } from "@material-ui/core";
-import CoreTypography from "src/components/core/typography";
+
+import { Event } from "utils/types";
 
 interface Props {
     events: Event[];
@@ -62,7 +59,6 @@ const Home: NextPage<Props> = ({ events, width }) => {
                         <CoreTypography variant="h3" style={{ fontWeight: "normal", color: "white", marginBottom: 30 }}>
                             Join us for a workday!
                         </CoreTypography>
-                        <DDate />
                     </Grid>
                     {width == "xs" ? null : (
                         <Grid

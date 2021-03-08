@@ -1,11 +1,12 @@
 import React from "react";
 
-import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import { Event } from "utils/types";
 import EventCard from "../EventCard";
+import Grid from "@material-ui/core/Grid";
+
+import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
+
+import { Event } from "utils/types";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({

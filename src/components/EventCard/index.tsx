@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) =>
             minWidth: 300,
         },
         thumbnailPlaceholder: {
-            background: `#97BBCB url("/${constants.org.images.defaultCard}") no-repeat center`,
+            background: `${theme.palette.secondary.main} url("/${constants.org.images.defaultCard}") no-repeat center`,
             backgroundSize: "100px",
             height: 200,
             transition: ".3s",
@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme: Theme) =>
         eventDate: {
             width: 65,
             height: 65,
-            backgroundColor: "#87CD9B",
+            backgroundColor: colors.green,
             position: "absolute",
             right: "5%",
             top: "5%",
