@@ -132,7 +132,7 @@ export default function EventSignUp() {
         const volunteer: Volunteer = {
             name: firstName.current!.value + " " + lastName.current!.value,
             email: email.current!.value,
-            phone: phoneNumber.current!.value,
+            phone: phoneNumber.current?.value,
         };
         console.log(volunteer);
     };
