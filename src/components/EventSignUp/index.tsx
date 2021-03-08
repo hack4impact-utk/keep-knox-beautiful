@@ -114,7 +114,6 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
-// on sign-up button click
 export default function EventSignUp() {
     const styles = useStyles();
     const firstName = useRef<HTMLInputElement>(null);
@@ -122,9 +121,11 @@ export default function EventSignUp() {
     const email = useRef<HTMLInputElement>(null);
     const phoneNumber = useRef<HTMLInputElement>(null);
 
+    // on sign-up button click
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        // creates Volunteer object
         const volunteer: Volunteer = {
             name: firstName.current!.value + " " + lastName.current!.value,
             email: email.current!.value,
