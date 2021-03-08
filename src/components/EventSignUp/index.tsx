@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, FormEvent } from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import DescriptionIcon from "@material-ui/icons/Description";
@@ -115,23 +115,23 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 // on sign-up button click
-const handleSubmit = () => {
-    // prevents passing raw field data through URL
-    event?.preventDefault();
-
-    // gets input field information
-    const firstName = (document.getElementById("firstNameField") as HTMLInputElement).value;
-    const lastName = (document.getElementById("lastNameField") as HTMLInputElement).value;
-    const email = (document.getElementById("emailField") as HTMLInputElement).value;
-    const phoneNumber = (document.getElementById("phoneNumberField") as HTMLInputElement).value;
-
-    // creates Volunteer object
-    const volunteer: Volunteer = { name: firstName + " " + lastName, email: email, phone: phoneNumber };
-    console.log(JSON.stringify(volunteer));
-};
-
 export default function EventSignUp() {
     const styles = useStyles();
+    const firstName = useRef<HTMLInputElement>(null);
+    const lastName = useRef<HTMLInputElement>(null);
+    const email = useRef<HTMLInputElement>(null);
+    const phoneNumber = useRef<HTMLInputElement>(null);
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const volunteer: Volunteer = {
+            name: firstName.current!.value + " " + lastName.current!.value,
+            email: email.current!.value,
+            phone: phoneNumber.current!.value,
+        };
+        console.log(volunteer);
+    };
 
     return (
         <React.Fragment>
@@ -151,25 +151,52 @@ export default function EventSignUp() {
                                 First Name
                             </CoreTypography>
                         </label>
-                        <input type="text" name="firstName" required className={styles.input} id="firstNameField" />
+                        <input
+                            type="text"
+                            name="firstName"
+                            ref={firstName}
+                            required
+                            className={styles.input}
+                            id="firstNameField"
+                        />
                         <label htmlFor="lastNameField">
                             <CoreTypography variant="body1" className={styles.inputLabel} id="lastNameLabel">
                                 Last Name
                             </CoreTypography>
                         </label>
-                        <input type="text" name="lastName" required className={styles.input} id="lastNameField" />
+                        <input
+                            type="text"
+                            name="lastName"
+                            ref={lastName}
+                            required
+                            className={styles.input}
+                            id="lastNameField"
+                        />
                         <label htmlFor="emailField">
                             <CoreTypography variant="body1" className={styles.inputLabel} id="emailLabel">
                                 Email
                             </CoreTypography>
                         </label>
-                        <input type="email" name="email" required className={styles.input} id="emailField" />
+                        <input
+                            type="email"
+                            name="email"
+                            ref={email}
+                            required
+                            className={styles.input}
+                            id="emailField"
+                        />
                         <label htmlFor="phoneNumberField">
                             <CoreTypography variant="body1" className={styles.inputLabel} id="phoneNumberLabel">
                                 Phone Number
                             </CoreTypography>
                         </label>
-                        <input type="tel" name="phoneNumber" className={styles.input} id="phoneNumberField" />
+                        <input
+                            type="tel"
+                            name="phoneNumber"
+                            ref={phoneNumber}
+                            className={styles.input}
+                            id="phoneNumberField"
+                        />
                         <Container className={styles.waiverLinkWrapper}>
                             <br></br>
                             <DescriptionIcon htmlColor="gray" />
