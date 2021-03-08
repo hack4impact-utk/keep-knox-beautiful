@@ -163,13 +163,13 @@ export default function EventSignUp() {
                                 Email
                             </CoreTypography>
                         </label>
-                        <input type="text" name="email" required className={styles.input} id="emailField" />
+                        <input type="email" name="email" required className={styles.input} id="emailField" />
                         <label htmlFor="phoneNumberField">
                             <CoreTypography variant="body1" className={styles.inputLabel} id="phoneNumberLabel">
                                 Phone Number
                             </CoreTypography>
                         </label>
-                        <input type="text" name="phoneNumber" className={styles.input} id="phoneNumberField" />
+                        <input type="tel" name="phoneNumber" className={styles.input} id="phoneNumberField" />
                         <Container className={styles.waiverLinkWrapper}>
                             <br></br>
                             <DescriptionIcon htmlColor="gray" />
