@@ -33,7 +33,9 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingTop: "220px",
             height: "700px",
             [theme.breakpoints.between(0, 720)]: {
+                height: "350px",
                 width: "371px",
+                paddingTop: "60px",
             },
         },
 
