@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) =>
             height: "auto",
             paddingLeft: "0",
 
-            [theme.breakpoints.between(0, 720)]: {
+            [theme.breakpoints.between(0, "sm")]: {
                 flexDirection: "column",
                 width: "375px",
             },
@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
             color: colors.white,
             paddingTop: "220px",
             height: "700px",
-            [theme.breakpoints.between(0, 720)]: {
+            [theme.breakpoints.between(0, "sm")]: {
                 height: "350px",
                 width: "371px",
                 paddingTop: "60px",
@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme: Theme) =>
             width: "310px",
             height: "700px",
 
-            [theme.breakpoints.between(0, 720)]: {
+            [theme.breakpoints.between(0, "sm")]: {
                 width: "375",
                 textAlign: "center",
                 position: "relative",
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) =>
         textWrapper: {
             paddingBottom: "20px",
 
-            [theme.breakpoints.between(0, 720)]: {
+            [theme.breakpoints.between(0, "sm")]: {
                 paddingBottom: "35px",
             },
         },
