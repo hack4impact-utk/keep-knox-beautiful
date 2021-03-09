@@ -1,4 +1,5 @@
 import React, { useRef, FormEvent } from "react";
+import InputMask from "react-input-mask";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import DescriptionIcon from "@material-ui/icons/Description";
@@ -91,7 +92,9 @@ export default function EventSignUp() {
                             ref={phoneNumber}
                             className={styles.input}
                             id="phoneNumberField"
-                        />
+                        >
+                            <InputMask mask="999-999-9999" />
+                        </input>
                         <Container className={styles.waiverLinkWrapper}>
                             <br></br>
                             <DescriptionIcon htmlColor="gray" />
