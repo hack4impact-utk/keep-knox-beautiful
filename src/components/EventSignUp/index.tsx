@@ -86,15 +86,21 @@ export default function EventSignUp() {
                                 Phone Number
                             </CoreTypography>
                         </label>
-                        <input
+                        {/* <input
                             type="tel"
                             name="phoneNumber"
                             ref={phoneNumber}
                             className={styles.input}
                             id="phoneNumberField"
-                        >
-                            <InputMask mask="999-999-9999" />
-                        </input>
+                        /> */}
+                        <InputMask 
+                            mask="(999) 999-9999"
+                            className={styles.input}
+                            inputRef={phoneNumber}
+                            name="phoneNumber"
+                            id="phoneNumberField"
+                        />
+
                         <Container className={styles.waiverLinkWrapper}>
                             <br></br>
                             <DescriptionIcon htmlColor="gray" />
