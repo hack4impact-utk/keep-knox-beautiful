@@ -8,115 +8,6 @@ import colors from "src/components/core/colors";
 import constants from "utils/constants";
 import { Volunteer } from "utils/types";
 
-// styles
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        container: {
-            display: "flex",
-            textAlign: "center",
-            width: "750px",
-            borderStyle: "solid",
-            borderWidth: "2px",
-            borderColor: theme.palette.primary.main,
-            height: "auto",
-            paddingLeft: "0",
-
-            [theme.breakpoints.between(0, "sm")]: {
-                flexDirection: "column",
-                width: "375px",
-            },
-        },
-
-        leftWrapper: {
-            backgroundColor: theme.palette.primary.main,
-            color: colors.white,
-            paddingTop: "220px",
-            height: "700px",
-            [theme.breakpoints.between(0, "sm")]: {
-                height: "350px",
-                width: "371px",
-                paddingTop: "60px",
-            },
-        },
-
-        rightWrapper: {
-            paddingTop: "50px",
-            width: "310px",
-            height: "700px",
-
-            [theme.breakpoints.between(0, "sm")]: {
-                width: "375",
-                textAlign: "center",
-                position: "relative",
-                left: "20px",
-            },
-        },
-
-        textWrapper: {
-            paddingBottom: "20px",
-
-            [theme.breakpoints.between(0, "sm")]: {
-                paddingBottom: "35px",
-            },
-        },
-
-        form: {
-            textAlign: "left",
-        },
-
-        input: {
-            backgroundColor: colors.lightGray,
-            border: "none",
-            height: "40px",
-            fontSize: "20px",
-        },
-
-        inputLabel: {
-            paddingTop: "25px",
-            paddingBottom: "5px",
-        },
-
-        waiverLinkWrapper: {
-            paddingLeft: "0px",
-            paddingTop: "5px",
-        },
-
-        waiverLink: {
-            color: colors.grays[80],
-            cursor: "pointer",
-        },
-
-        waiverCheckboxWrapper: {
-            display: "flex",
-            paddingTop: "10px",
-            paddingLeft: "0px",
-        },
-
-        waiverCheckbox: {
-            marginTop: "15px",
-            cursor: "pointer",
-        },
-
-        waiverCheckboxText: {
-            width: "240px",
-            paddingLeft: "10px",
-            cursor: "pointer",
-        },
-
-        button: {
-            marginTop: "25px",
-            marginLeft: "160px",
-            padding: "15px",
-            backgroundColor: theme.palette.primary.main,
-            border: "none",
-            color: colors.white,
-            borderRadius: "6px",
-            fontSize: "20px",
-            fontFamily: "Roboto",
-        },
-    })
-);
-
 export default function EventSignUp() {
     const styles = useStyles();
     const firstName = useRef<HTMLInputElement>(null);
@@ -228,3 +119,112 @@ export default function EventSignUp() {
         </React.Fragment>
     );
 }
+
+// styles
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        container: {
+            display: "flex",
+            textAlign: "center",
+            width: "750px",
+            borderStyle: "solid",
+            borderWidth: "2px",
+            borderColor: theme.palette.primary.main,
+            height: "auto",
+            paddingLeft: "0",
+
+            [theme.breakpoints.between(0, "sm")]: {
+                flexDirection: "column",
+                width: "375px",
+            },
+        },
+
+        leftWrapper: {
+            backgroundColor: theme.palette.primary.main,
+            color: colors.white,
+            paddingTop: "220px",
+            height: "700px",
+            [theme.breakpoints.between(0, "sm")]: {
+                height: "350px",
+                width: "371px",
+                paddingTop: "60px",
+            },
+        },
+
+        rightWrapper: {
+            paddingTop: "50px",
+            width: "310px",
+            height: "700px",
+
+            [theme.breakpoints.between(0, "sm")]: {
+                width: "375",
+                textAlign: "center",
+                position: "relative",
+                left: "20px",
+            },
+        },
+
+        textWrapper: {
+            paddingBottom: "20px",
+
+            [theme.breakpoints.between(0, "sm")]: {
+                paddingBottom: "35px",
+            },
+        },
+
+        form: {
+            textAlign: "left",
+        },
+
+        input: {
+            backgroundColor: colors.lightGray,
+            border: "none",
+            height: "40px",
+            fontSize: "20px",
+        },
+
+        inputLabel: {
+            paddingTop: "25px",
+            paddingBottom: "5px",
+        },
+
+        waiverLinkWrapper: {
+            paddingLeft: "0px",
+            paddingTop: "5px",
+        },
+
+        waiverLink: {
+            color: colors.grays[80],
+            cursor: "pointer",
+        },
+
+        waiverCheckboxWrapper: {
+            display: "flex",
+            paddingTop: "10px",
+            paddingLeft: "0px",
+        },
+
+        waiverCheckbox: {
+            marginTop: "15px",
+            cursor: "pointer",
+        },
+
+        waiverCheckboxText: {
+            width: "240px",
+            paddingLeft: "10px",
+            cursor: "pointer",
+        },
+
+        button: {
+            marginTop: "25px",
+            marginLeft: "160px",
+            padding: "15px",
+            backgroundColor: theme.palette.primary.main,
+            border: "none",
+            color: colors.white,
+            borderRadius: "6px",
+            fontSize: "20px",
+            fontFamily: "Roboto",
+        },
+    })
+);
