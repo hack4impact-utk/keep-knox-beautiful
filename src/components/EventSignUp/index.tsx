@@ -1,4 +1,4 @@
-import React, { useRef, FormEvent } from "react";
+import React, { useState, useRef } from "react";
 import InputMask from "react-input-mask";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
@@ -14,19 +14,25 @@ export default function EventSignUp() {
     const firstName = useRef<HTMLInputElement>(null);
     const lastName = useRef<HTMLInputElement>(null);
     const email = useRef<HTMLInputElement>(null);
-    const phoneNumber = useRef<HTMLInputElement>(null);
+    const [phoneNumber, setPhoneNumber] = useState("");
 
     // on sign-up button click
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         // creates Volunteer object
         const volunteer: Volunteer = {
             name: firstName.current!.value + " " + lastName.current!.value,
             email: email.current!.value,
-            phone: phoneNumber.current?.value,
+            phone: phoneNumber,
         };
         console.log(volunteer);
+    };
+
+    const handleInputMaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        e.preventDefault;
+        setPhoneNumber(e.target?.value);
     };
 
     return (
@@ -93,10 +99,10 @@ export default function EventSignUp() {
                             className={styles.input}
                             id="phoneNumberField"
                         /> */}
-                        <InputMask 
+                        <InputMask
                             mask="(999) 999-9999"
                             className={styles.input}
-                            inputRef={phoneNumber}
+                            onChange={handleInputMaskChange}
                             name="phoneNumber"
                             id="phoneNumberField"
                         />
