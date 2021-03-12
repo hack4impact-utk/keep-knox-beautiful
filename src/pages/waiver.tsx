@@ -115,7 +115,6 @@ const useStyles = makeStyles((theme: Theme) =>
         },
 
         bottomText: {
-            alignSelf: "center",
             textAlign: "center",
             paddingBottom: "20px",
         },
