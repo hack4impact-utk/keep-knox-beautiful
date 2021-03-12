@@ -111,7 +111,7 @@ export default function EventSignUp() {
                             <br></br>
                             <DescriptionIcon htmlColor="gray" />
                             &nbsp;
-                            <Link href="/waiver" className={styles.waiverLink}>
+                            <Link href="/waiver" target="_blank" className={styles.waiverLink}>
                                 {constants.org.name.short} Volunteer Waiver
                             </Link>
                         </Container>
