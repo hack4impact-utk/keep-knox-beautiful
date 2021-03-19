@@ -14,6 +14,9 @@ const theme = createMuiTheme({
         accent: {
             main: colors.pink,
         },
+        error: {
+            main: colors.red,
+        },
         background: {
             paper: colors.white,
         },

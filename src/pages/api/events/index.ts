@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import errors from "utils/errors";
-import formidable from "formidable";
+import formidable, { File } from "formidable";
 import { Event, APIError } from "utils/types";
 import { addEvent, getEvents } from "server/actions/Event";
+import { uploadImage } from "server/actions/Contentful";
 
 // formidable config
 export const config = {
@@ -28,7 +29,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // fields includes everything but files
                 const event: Event = (fields as unknown) as Event;
 
-                // TODO check image size and upload to contentful
+                // fields are strings so convert the numbers
+                event.hours = Number(event?.hours);
+                event.maxVolunteers = Number(event?.maxVolunteers);
+                console.log(event);
+
+                if (files.image) {
+                    // TODO check image size
+                    event.image = await uploadImage(files.image as File);
+                }
 
                 await addEvent(event);
                 res.status(200).json({
@@ -43,8 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 success: false,
                 message: error.message,
             });
-        }
-        else {
+        } else {
             console.error(error instanceof Error && error);
             res.status(500).json({
                 success: false,
