@@ -62,11 +62,30 @@ export const registerVolunteerToEvent = async function (vol: Volunteer, eventId:
     }
 
     volunteer.registeredEvents?.push(eventId);
-    volunteer.totalHours! += event.hours!;
+    // volunteer.totalHours! += event.hours!;
     event.registeredVolunteers?.push(volunteer._id);
     event.volunteerCount! += 1; // default to 0 so will never be undefined
     // these are not atomic updates
     const volPromise = VolunteerSchema.updateOne({ email: vol.email }, volunteer);
     const eventPromise = EventSchema.updateOne({ _id: eventId }, event);
     await Promise.all([volPromise, eventPromise]);
+};
+
+export const checkInVolunteer = async function (vol: Volunteer, eventId: string) {
+    const event = await EventSchema.findById(eventId);
+    const volunteer = await VolunteerSchema.findById(vol._id);
+
+    if (vol.registeredEvents?.indexOf(event?._id) === -1) {
+        throw new APIError(500, "This volunteer is not signed up for this event.");
+    }
+
+    if (volunteer?.attendedEvents?.indexOf(event?._id) !== -1) {
+        throw new APIError(404, "The volunteer has already been checked-in to this event.");
+    }
+
+    volunteer?.attendedEvents.push(eventId);
+    volunteer.totalHours! += event!.hours!;
+
+    const volPromise = VolunteerSchema.updateOne({ email: vol.email }, volunteer);
+    await Promise.all([volPromise]);
 };
