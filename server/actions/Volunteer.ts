@@ -71,6 +71,8 @@ export const registerVolunteerToEvent = async function (vol: Volunteer, eventId:
     await Promise.all([volPromise, eventPromise]);
 };
 
+// checkInVolunteer takes a vol and eventId and will check that vol
+// in if they are registered for the event
 export const checkInVolunteer = async function (vol: Volunteer, eventId: string) {
     const event = await EventSchema.findById(eventId);
     const volunteer = await VolunteerSchema.findById(vol._id);

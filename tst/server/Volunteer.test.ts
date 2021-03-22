@@ -1,4 +1,4 @@
-import { addVolunteer, getVolunteer, registerVolunteerToEvent } from "server/actions/Volunteer";
+import { addVolunteer, checkInVolunteer, getVolunteer, registerVolunteerToEvent } from "server/actions/Volunteer";
 import VolunteerSchema from "server/models/Volunteer";
 import EventSchema from "server/models/Event";
 import { Volunteer, Event } from "utils/types";
@@ -244,5 +244,144 @@ describe("registerVolunteerToEvent() tests", () => {
         expect(EventSchema.findById).lastCalledWith(eventId);
         expect(EventSchema.findById).toHaveBeenCalledTimes(1);
         expect(VolunteerSchema.findOneAndUpdate).toHaveBeenCalledTimes(0);
+    });
+});
+
+describe("checkInVolunteer() tests", () => {
+    const newVolunteer: Volunteer = {
+        name: "John Smith",
+        email: "jsmith@gmail.com",
+        phone: "(931) 931-9319",
+    };
+
+    test("can't check in unregistered volunteers", async () => {
+        const eventId = "604d6730ca1c1d7fcd4fbdc4";
+        // this event is already at capacity
+        const mockEvent: Event = {
+            _id: "604d6730ca1c1d7fcd4fbdc4",
+            name: "February Spruce Up",
+            description: "We are sprucing in February. Come spruce with us :)",
+            caption: "It's spruce season",
+            maxVolunteers: 4,
+            volunteerCount: 1,
+            location: "1234 Neyland Dr\nKnoxville, TN 37916",
+            startDate: new Date(Date.now()),
+            endDate: new Date(Date.now()),
+            startRegistration: new Date(Date.now()),
+            endRegistration: new Date(Date.now()),
+            hours: 3,
+            image: {
+                assetID: "aASDuiHWIDUOHWEff",
+                url: "https://i.imgur.com/MrGY5EL.jpeg",
+            },
+            registeredVolunteers: ["604d6730ca1c1d7fcd4fbdd2"],
+            attendedVolunteers: [],
+        };
+        const mockVolunteer: Volunteer = {
+            _id: "604d6730ca1c1d7fcd4fbde0",
+            name: "John Smith",
+            email: "jsmith@gmail.com",
+            phone: "(931) 931-9319",
+            totalEvents: 2,
+            totalHours: 5,
+            registeredEvents: ["604d6730ca1c1d7fcd4fbdc2"],
+            attendedEvents: ["604d6730ca1c1d7fcd4fbdc3"],
+        };
+        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
+        VolunteerSchema.updateOne = jest.fn().mockResolvedValue(mockVolunteer);
+        VolunteerSchema.findById = jest.fn().mockResolvedValue(mockVolunteer);
+        await expect(checkInVolunteer(mockVolunteer, eventId)).rejects.toThrowError(
+            "This volunteer is not signed up for this event."
+        );
+        expect(EventSchema.findById).toHaveBeenCalledWith(eventId);
+        expect(VolunteerSchema.findById).toHaveBeenLastCalledWith(mockVolunteer._id!);
+        expect(VolunteerSchema.updateOne).toHaveBeenCalledTimes(0);
+    });
+
+    test("cant check-in checked-in volunteers", async () => {
+        const eventId = "604d6730ca1c1d7fcd4fbdc4";
+        // this event is already at capacity
+        const mockEvent: Event = {
+            _id: "604d6730ca1c1d7fcd4fbdc4",
+            name: "February Spruce Up",
+            description: "We are sprucing in February. Come spruce with us :)",
+            caption: "It's spruce season",
+            maxVolunteers: 4,
+            volunteerCount: 1,
+            location: "1234 Neyland Dr\nKnoxville, TN 37916",
+            startDate: new Date(Date.now()),
+            endDate: new Date(Date.now()),
+            startRegistration: new Date(Date.now()),
+            endRegistration: new Date(Date.now()),
+            hours: 3,
+            image: {
+                assetID: "aASDuiHWIDUOHWEff",
+                url: "https://i.imgur.com/MrGY5EL.jpeg",
+            },
+            registeredVolunteers: ["604d6730ca1c1d7fcd4fbdd2", "604d6730ca1c1d7fcd4fbde0"],
+            attendedVolunteers: ["604d6730ca1c1d7fcd4fbde0"],
+        };
+        const mockVolunteer: Volunteer = {
+            _id: "604d6730ca1c1d7fcd4fbde0",
+            name: "John Smith",
+            email: "jsmith@gmail.com",
+            phone: "(931) 931-9319",
+            totalEvents: 2,
+            totalHours: 5,
+            registeredEvents: ["604d6730ca1c1d7fcd4fbdc2", "604d6730ca1c1d7fcd4fbdc4"],
+            attendedEvents: ["604d6730ca1c1d7fcd4fbdc3", "604d6730ca1c1d7fcd4fbdc4"],
+        };
+        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
+        VolunteerSchema.updateOne = jest.fn().mockResolvedValue(mockVolunteer);
+        VolunteerSchema.findById = jest.fn().mockResolvedValue(mockVolunteer);
+        await expect(checkInVolunteer(mockVolunteer, eventId)).rejects.toThrowError(
+            "The volunteer has already been checked-in to this event."
+        );
+        expect(EventSchema.findById).toHaveBeenCalledWith(eventId);
+        expect(VolunteerSchema.findById).toHaveBeenLastCalledWith(mockVolunteer._id!);
+        expect(VolunteerSchema.updateOne).toHaveBeenCalledTimes(0);
+    });
+
+    test("can check-in when conditions are right", async () => {
+        const eventId = "604d6730ca1c1d7fcd4fbdc4";
+        // this event is already at capacity
+        const mockEvent: Event = {
+            _id: "604d6730ca1c1d7fcd4fbdc4",
+            name: "February Spruce Up",
+            description: "We are sprucing in February. Come spruce with us :)",
+            caption: "It's spruce season",
+            maxVolunteers: 4,
+            volunteerCount: 1,
+            location: "1234 Neyland Dr\nKnoxville, TN 37916",
+            startDate: new Date(Date.now()),
+            endDate: new Date(Date.now()),
+            startRegistration: new Date(Date.now()),
+            endRegistration: new Date(Date.now()),
+            hours: 3,
+            image: {
+                assetID: "aASDuiHWIDUOHWEff",
+                url: "https://i.imgur.com/MrGY5EL.jpeg",
+            },
+            registeredVolunteers: ["604d6730ca1c1d7fcd4fbdd2", "604d6730ca1c1d7fcd4fbde0"],
+            attendedVolunteers: [],
+        };
+        const mockVolunteer: Volunteer = {
+            _id: "604d6730ca1c1d7fcd4fbde0",
+            name: "John Smith",
+            email: "jsmith@gmail.com",
+            phone: "(931) 931-9319",
+            totalEvents: 2,
+            totalHours: 5,
+            registeredEvents: ["604d6730ca1c1d7fcd4fbdc2", "604d6730ca1c1d7fcd4fbdc4"],
+            attendedEvents: ["604d6730ca1c1d7fcd4fbdc3"],
+        };
+        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
+        VolunteerSchema.updateOne = jest.fn().mockResolvedValue(mockVolunteer);
+        VolunteerSchema.findById = jest.fn().mockResolvedValue(mockVolunteer);
+        await checkInVolunteer(mockVolunteer, eventId);
+        expect(EventSchema.findById).toHaveBeenCalledWith(eventId);
+        expect(VolunteerSchema.findById).toHaveBeenLastCalledWith(mockVolunteer._id!);
+        expect(VolunteerSchema.updateOne).toHaveBeenCalledTimes(1);
+        expect(mockVolunteer.attendedEvents?.length).toBeGreaterThanOrEqual(2);
     });
 });
