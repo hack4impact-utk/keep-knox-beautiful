@@ -62,7 +62,6 @@ export const registerVolunteerToEvent = async function (vol: Volunteer, eventId:
     }
 
     volunteer.registeredEvents?.push(eventId);
-    volunteer.totalHours! += event.hours!;
     event.registeredVolunteers?.push(volunteer._id);
     event.volunteerCount! += 1; // default to 0 so will never be undefined
     // these are not atomic updates
@@ -91,4 +90,15 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
     if (!volunteer) {
         throw new APIError(404, "Volunteer does not exist.");
     }
+
+    const volPromise = await VolunteerSchema.findByIdAndUpdate(volId, {
+        $push: { attendedEvents: eventId },
+        $pull: { registeredEvents: eventId },
+        $inc: { totalHours: event.hours!, totalEvents: 1 },
+    });
+
+    const eventPromise = await EventSchema.findByIdAndUpdate(eventId, {
+        $push: { attendedVolunteers: volId },
+        $pull: { registeredVolunteers: volId },
+    });
 };
