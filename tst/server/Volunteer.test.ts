@@ -1,4 +1,4 @@
-import { addVolunteer, getVolunteer, registerVolunteerToEvent } from "server/actions/Volunteer";
+import { addVolunteer, getVolunteer, markVolunteerPresent, registerVolunteerToEvent } from "server/actions/Volunteer";
 import VolunteerSchema from "server/models/Volunteer";
 import EventSchema from "server/models/Event";
 import { Volunteer, Event } from "utils/types";
@@ -244,5 +244,68 @@ describe("registerVolunteerToEvent() tests", () => {
         expect(EventSchema.findById).lastCalledWith(eventId);
         expect(EventSchema.findById).toHaveBeenCalledTimes(1);
         expect(VolunteerSchema.findOneAndUpdate).toHaveBeenCalledTimes(0);
+    });
+});
+
+describe("markVolunteerPresent() tests", () => {
+    test("successfully checked in", async () => {
+        const eventId = "604d6730ca1c1d7fcd4fbdc9";
+        const volId = "604d6730ca1c1d7fcd4fbde0";
+        const mockEvent: Event = {
+            _id: "604d6730ca1c1d7fcd4fbdc9",
+            name: "February Spruce Up",
+            description: "We are sprucing in February. Come spruce with us :)",
+            caption: "It's spruce season",
+            maxVolunteers: 10,
+            volunteerCount: 4,
+            location: "1234 Neyland Dr\nKnoxville, TN 37916",
+            startDate: new Date(Date.now()),
+            endDate: new Date(Date.now()),
+            startRegistration: new Date(Date.now()),
+            endRegistration: new Date(Date.now()),
+            hours: 3,
+            image: {
+                assetID: "aASDuiHWIDUOHWEff",
+                url: "https://i.imgur.com/MrGY5EL.jpeg",
+            },
+            registeredVolunteers: ["604d6730ca1c1d7fcd4fbdd2", "604d6730ca1c1d7fcd4fbdd3", "604d6730ca1c1d7fcd4fbde0"],
+            attendedVolunteers: [],
+        };
+        const mockVolunteer: Volunteer = {
+            _id: "604d6730ca1c1d7fcd4fbde0",
+            name: "John Smith",
+            email: "jsmith@gmail.com",
+            phone: "(931) 931-9319",
+            totalEvents: 2,
+            totalHours: 5,
+            registeredEvents: ["604d6730ca1c1d7fcd4fbdc9"],
+            attendedEvents: [],
+        };
+
+        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent._id);
+        VolunteerSchema.findById = jest.fn().mockResolvedValue(mockVolunteer._id);
+
+        EventSchema.findByIdAndUpdate = jest.fn().mockResolvedValue(mockEvent._id);
+        VolunteerSchema.findByIdAndUpdate = jest.fn().mockResolvedValue(mockVolunteer._id);
+
+        await markVolunteerPresent(mockVolunteer._id!, mockEvent._id!);
+        expect(EventSchema.findById).lastCalledWith(mockEvent._id);
+        expect(EventSchema.findById).toHaveBeenCalledTimes(1);
+        expect(VolunteerSchema.findById).lastCalledWith(mockVolunteer._id);
+        expect(VolunteerSchema.findById).toHaveBeenCalledTimes(1);
+
+        expect(EventSchema.findByIdAndUpdate).lastCalledWith(mockEvent._id, {
+            $pull: { registeredVolunteers: mockVolunteer._id },
+            $push: { attendedVolunteers: mockVolunteer._id },
+        });
+        expect(EventSchema.findByIdAndUpdate).toHaveBeenCalledTimes(1);
+
+        // WHY DOESN'T THIS PASS?
+        expect(VolunteerSchema.findByIdAndUpdate).lastCalledWith(mockVolunteer._id, {
+            $pull: { registeredEvents: mockEvent._id },
+            $push: { attendedEvents: mockEvent._id },
+            $inc: { totalEvents: 1, totalHours: mockEvent.hours },
+        });
+        expect(VolunteerSchema.findByIdAndUpdate).toHaveBeenCalledTimes(1);
     });
 });
