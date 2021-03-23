@@ -102,3 +102,36 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
         $pull: { registeredVolunteers: volId },
     });
 };
+
+/**
+ * Un-marks volunteer as present at an event. Does the same to the volunteer's attended events list.
+ * @param vol The volunteer id of the volunteer to un-mark present
+ * @param eventId the event id the volunteer is registered for
+ */
+export const unMarkVolunteerPresent = async function (volId: string, eventId: string) {
+    await mongoDB();
+    if (!volId || !eventId) {
+        throw new APIError(400, "Invalid input. Need both volunteer and event information.");
+    }
+
+    const event = await EventSchema.findById(eventId);
+    if (!event) {
+        throw new APIError(404, "Event does not exist.");
+    }
+
+    const volunteer = await VolunteerSchema.findById(volId);
+    if (!volunteer) {
+        throw new APIError(404, "Volunteer does not exist.");
+    }
+
+    const volPromise = await VolunteerSchema.findByIdAndUpdate(volId, {
+        $push: { registeredEvents: eventId },
+        $pull: { attendedEvents: eventId },
+        $inc: { totalHours: -1 * event.hours!, totalEvents: -1 },
+    });
+
+    const eventPromise = await EventSchema.findByIdAndUpdate(eventId, {
+        $push: { registeredVolunteers: volId },
+        $pull: { attendedVolunteers: volId },
+    });
+};
