@@ -108,7 +108,7 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
  * @param vol The volunteer id of the volunteer to un-mark present
  * @param eventId the event id the volunteer is registered for
  */
-export const unMarkVolunteerPresent = async function (volId: string, eventId: string) {
+export const markVolunteerNotPresent = async function (volId: string, eventId: string) {
     await mongoDB();
     if (!volId || !eventId) {
         throw new APIError(400, "Invalid input. Need both volunteer and event information.");

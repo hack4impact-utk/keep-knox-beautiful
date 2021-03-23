@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { unMarkVolunteerPresent } from "server/actions/Volunteer";
+import { markVolunteerNotPresent } from "server/actions/Volunteer";
 import errors from "utils/errors";
 import { APIError } from "utils/types";
 
@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const eventId = req.query.eventId as string;
             const volId = req.query.volId as string;
 
-            await unMarkVolunteerPresent(volId, eventId);
+            await markVolunteerNotPresent(volId, eventId);
             res.status(200).json({
                 success: true,
                 payload: {},
