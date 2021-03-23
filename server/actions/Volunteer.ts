@@ -91,6 +91,14 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
         throw new APIError(404, "Volunteer does not exist.");
     }
 
+    if (volunteer.registeredEvents?.indexOf(event?._id) === -1) {
+        throw new APIError(500, "This volunteer is not signed up for this event.");
+    }
+
+    if (volunteer?.attendedEvents?.indexOf(event?._id) !== -1) {
+        throw new APIError(500, "The volunteer has already been checked in to this event.");
+    }
+
     const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
         $push: { attendedEvents: eventId },
         $pull: { registeredEvents: eventId },
@@ -124,6 +132,13 @@ export const markVolunteerNotPresent = async function (volId: string, eventId: s
     const volunteer = await VolunteerSchema.findById(volId);
     if (!volunteer) {
         throw new APIError(404, "Volunteer does not exist.");
+    }
+
+    if (
+        volunteer.attendedEvents?.indexOf(event?._id) === -1 ||
+        volunteer?.registeredEvents?.indexOf(event?._id) !== -1
+    ) {
+        throw new APIError(500, "This volunteer is not checked in to this event.");
     }
 
     const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
