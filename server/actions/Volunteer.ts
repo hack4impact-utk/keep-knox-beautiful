@@ -91,11 +91,17 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
         throw new APIError(404, "Volunteer does not exist.");
     }
 
-    if (volunteer.registeredEvents?.indexOf(event?._id) === -1) {
+    if (
+        volunteer.registeredEvents?.indexOf(event?._id) === -1 ||
+        event.registeredVolunteers?.indexOf(volunteer?._id) === -1
+    ) {
         throw new APIError(500, "This volunteer is not signed up for this event.");
     }
 
-    if (volunteer?.attendedEvents?.indexOf(event?._id) !== -1) {
+    if (
+        volunteer?.attendedEvents?.indexOf(event?._id) !== -1 ||
+        event?.attendedVolunteers?.indexOf(volunteer?._id) !== -1
+    ) {
         throw new APIError(500, "The volunteer has already been checked in to this event.");
     }
 
@@ -137,6 +143,13 @@ export const markVolunteerNotPresent = async function (volId: string, eventId: s
     if (
         volunteer.attendedEvents?.indexOf(event?._id) === -1 ||
         volunteer?.registeredEvents?.indexOf(event?._id) !== -1
+    ) {
+        throw new APIError(500, "This volunteer is not checked in to this event.");
+    }
+
+    if (
+        event.attendedVolunteers?.indexOf(volunteer?._id) === -1 ||
+        event?.registeredVolunteers?.indexOf(volunteer?._id) !== -1
     ) {
         throw new APIError(500, "This volunteer is not checked in to this event.");
     }
