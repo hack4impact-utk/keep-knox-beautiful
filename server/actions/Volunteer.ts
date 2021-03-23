@@ -91,16 +91,18 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
         throw new APIError(404, "Volunteer does not exist.");
     }
 
-    const volPromise = await VolunteerSchema.findByIdAndUpdate(volId, {
+    const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
         $push: { attendedEvents: eventId },
         $pull: { registeredEvents: eventId },
         $inc: { totalHours: event.hours!, totalEvents: 1 },
     });
 
-    const eventPromise = await EventSchema.findByIdAndUpdate(eventId, {
+    const eventPromise = EventSchema.findByIdAndUpdate(eventId, {
         $push: { attendedVolunteers: volId },
         $pull: { registeredVolunteers: volId },
     });
+
+    await Promise.all([volPromise, eventPromise]);
 };
 
 /**
@@ -124,14 +126,16 @@ export const markVolunteerNotPresent = async function (volId: string, eventId: s
         throw new APIError(404, "Volunteer does not exist.");
     }
 
-    const volPromise = await VolunteerSchema.findByIdAndUpdate(volId, {
+    const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
         $push: { registeredEvents: eventId },
         $pull: { attendedEvents: eventId },
         $inc: { totalHours: -1 * event.hours!, totalEvents: -1 },
     });
 
-    const eventPromise = await EventSchema.findByIdAndUpdate(eventId, {
+    const eventPromise = EventSchema.findByIdAndUpdate(eventId, {
         $push: { registeredVolunteers: volId },
         $pull: { attendedVolunteers: volId },
     });
+
+    await Promise.all([volPromise, eventPromise]);
 };

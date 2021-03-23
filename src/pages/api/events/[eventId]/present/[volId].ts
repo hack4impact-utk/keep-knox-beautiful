@@ -7,7 +7,7 @@ import { APIError } from "utils/types";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         if (!req || !req.query || !req.query.eventId || !req.query.volId) {
-            throw new Error("Need an event id a volunteer id for this route.");
+            throw new Error("Need an event id and a volunteer id for this route.");
         }
 
         if (req.method == "GET") {
