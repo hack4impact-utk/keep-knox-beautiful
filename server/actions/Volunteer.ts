@@ -72,7 +72,7 @@ export const registerVolunteerToEvent = async function (vol: Volunteer, eventId:
 
 /**
  * Marks a volunteer present at an event. Also adds the event to a volunteer's attended events list.
- * @param vol The volunteer id of the volunteer to mark present
+ * @param volId The volunteer id of the volunteer to mark present
  * @param eventId the event id the volunteer attended
  */
 export const markVolunteerPresent = async function (volId: string, eventId: string) {
@@ -92,17 +92,17 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
     }
 
     if (
-        volunteer.registeredEvents?.indexOf(event?._id) === -1 ||
-        event.registeredVolunteers?.indexOf(volunteer?._id) === -1
+        volunteer.attendedEvents?.indexOf(event?._id) !== -1 ||
+        event.attendedVolunteers?.indexOf(volunteer?._id) !== -1
     ) {
-        throw new APIError(500, "This volunteer is not signed up for this event.");
+        throw new APIError(500, "The volunteer has already been checked in to this event.");
     }
 
     if (
-        volunteer?.attendedEvents?.indexOf(event?._id) !== -1 ||
-        event?.attendedVolunteers?.indexOf(volunteer?._id) !== -1
+        volunteer.registeredEvents?.indexOf(event?._id) === -1 ||
+        event.registeredVolunteers?.indexOf(volunteer?._id) === -1
     ) {
-        throw new APIError(500, "The volunteer has already been checked in to this event.");
+        throw new APIError(500, "This volunteer is not registered for this event.");
     }
 
     const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
@@ -121,7 +121,7 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
 
 /**
  * Un-marks volunteer as present at an event. Does the same to the volunteer's attended events list.
- * @param vol The volunteer id of the volunteer to un-mark present
+ * @param volId The volunteer id of the volunteer to un-mark present
  * @param eventId the event id the volunteer is registered for
  */
 export const markVolunteerNotPresent = async function (volId: string, eventId: string) {
