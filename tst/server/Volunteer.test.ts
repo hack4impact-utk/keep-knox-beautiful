@@ -450,7 +450,7 @@ describe("markVolunteerNotPresent() tests", () => {
         expect(VolunteerSchema.findByIdAndUpdate).toHaveBeenCalledTimes(1);
     });
 
-    test("volunteer not checked in", async () => {
+    test("volunteer not checked in event-side", async () => {
         const mockEvent: Event = {
             _id: "604d6730ca1c1d7fcd4fbdc9",
             name: "February Spruce Up",
@@ -470,6 +470,50 @@ describe("markVolunteerNotPresent() tests", () => {
             },
             registeredVolunteers: ["604d6730ca1c1d7fcd4fbdd2", "604d6730ca1c1d7fcd4fbdd3", "604d6730ca1c1d7fcd4fbde0"],
             attendedVolunteers: [],
+        };
+        const mockVolunteer: Volunteer = {
+            _id: "604d6730ca1c1d7fcd4fbde0",
+            name: "John Smith",
+            email: "jsmith@gmail.com",
+            phone: "(931) 931-9319",
+            totalEvents: 2,
+            totalHours: 5,
+            registeredEvents: ["604d6730ca1c1d7fcd4fbbb1"],
+            attendedEvents: ["604d6730ca1c1d7fcd4fbdc9"],
+        };
+        EventSchema.findById = jest.fn().mockResolvedValue(mockEvent);
+        VolunteerSchema.findById = jest.fn().mockResolvedValue(mockVolunteer);
+        EventSchema.findByIdAndUpdate = jest.fn().mockResolvedValue(mockEvent);
+        VolunteerSchema.findByIdAndUpdate = jest.fn().mockResolvedValue(mockVolunteer);
+        await expect(markVolunteerNotPresent(mockVolunteer._id!, mockEvent._id!)).rejects.toThrowError(
+            "The volunteer is not checked in to this event."
+        );
+        expect(EventSchema.findById).lastCalledWith(mockEvent._id);
+        expect(EventSchema.findById).toHaveBeenCalledTimes(1);
+        expect(VolunteerSchema.findById).lastCalledWith(mockVolunteer._id);
+        expect(VolunteerSchema.findById).toHaveBeenCalledTimes(1);
+    });
+
+    test("volunteer not checked in volunteer-side", async () => {
+        const mockEvent: Event = {
+            _id: "604d6730ca1c1d7fcd4fbdc9",
+            name: "February Spruce Up",
+            description: "We are sprucing in February. Come spruce with us :)",
+            caption: "It's spruce season",
+            maxVolunteers: 10,
+            volunteerCount: 4,
+            location: "1234 Neyland Dr\nKnoxville, TN 37916",
+            startDate: new Date(Date.now()),
+            endDate: new Date(Date.now()),
+            startRegistration: new Date(Date.now()),
+            endRegistration: new Date(Date.now()),
+            hours: 3,
+            image: {
+                assetID: "aASDuiHWIDUOHWEff",
+                url: "https://i.imgur.com/MrGY5EL.jpeg",
+            },
+            registeredVolunteers: ["604d6730ca1c1d7fcd4fbdd2", "604d6730ca1c1d7fcd4fbdd3"],
+            attendedVolunteers: ["604d6730ca1c1d7fcd4fbde0"],
         };
         const mockVolunteer: Volunteer = {
             _id: "604d6730ca1c1d7fcd4fbde0",
