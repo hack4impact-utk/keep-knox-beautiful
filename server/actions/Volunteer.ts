@@ -102,7 +102,7 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
         volunteer.registeredEvents?.indexOf(event?._id) === -1 ||
         event.registeredVolunteers?.indexOf(volunteer?._id) === -1
     ) {
-        throw new APIError(500, "This volunteer is not registered for this event.");
+        throw new APIError(500, "The volunteer is not registered for this event.");
     }
 
     const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
@@ -144,14 +144,14 @@ export const markVolunteerNotPresent = async function (volId: string, eventId: s
         volunteer.attendedEvents?.indexOf(event?._id) === -1 ||
         volunteer?.registeredEvents?.indexOf(event?._id) !== -1
     ) {
-        throw new APIError(500, "This volunteer is not checked in to this event.");
+        throw new APIError(500, "The volunteer is not checked in to this event.");
     }
 
     if (
         event.attendedVolunteers?.indexOf(volunteer?._id) === -1 ||
         event?.registeredVolunteers?.indexOf(volunteer?._id) !== -1
     ) {
-        throw new APIError(500, "This volunteer is not checked in to this event.");
+        throw new APIError(500, "The volunteer is not checked in to this event.");
     }
 
     const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
