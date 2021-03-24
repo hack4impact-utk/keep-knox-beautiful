@@ -3,14 +3,14 @@ import { markVolunteerPresent } from "server/actions/Volunteer";
 import errors from "utils/errors";
 import { APIError } from "utils/types";
 
-// GET /api/events/[eventId]/present/[volId] will mark volunteer volId as present for event eventId
+// POST /api/events/[eventId]/present/[volId] will mark volunteer volId as present for event eventId
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         if (!req || !req.query || !req.query.eventId || !req.query.volId) {
             throw new Error("Need an event id and a volunteer id for this route.");
         }
 
-        if (req.method == "GET") {
+        if (req.method == "POST") {
             const eventId = req.query.eventId as string;
             const volId = req.query.volId as string;
 
