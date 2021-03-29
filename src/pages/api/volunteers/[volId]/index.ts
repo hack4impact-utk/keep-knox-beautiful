@@ -4,10 +4,13 @@ import errors from "utils/errors";
 import { Volunteer, APIError } from "utils/types";
 import constants from "utils/constants";
 import formidable from "formidable";
-import { FormatAlignLeft } from "@material-ui/icons";
 
-// GET /api/volunteers/[volId] will return a single volunteer profile that matches the volId
-// POST /api/volunteers/[volId] will take new form data and update basic account info
+// formidable config
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
 
 // @route   GET /api/volunteers/[volId] - Returns a single Volunteer object with _id of volId.
 // @route   POST /api/volunteers/[volId] - Updates existing Volunteer object with _id of volId.
@@ -26,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         } else if (req.method == "POST") {
             const form = new formidable.IncomingForm();
-            form.parse(req, async (err: string, fields: formidable.Fields) => {
+            form.parse(req, async (err: string, fields: formidable.Fields, files: formidable.Files) => {
                 try {
                     const newVol: Volunteer = (fields as unknown) as Volunteer;
 
