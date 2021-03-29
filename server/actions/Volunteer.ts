@@ -4,6 +4,7 @@ import EventSchema from "../models/Event";
 import { Volunteer, APIError } from "utils/types";
 
 /**
+ * Gets a volunteer by id from database and returns the volunteer.
  * @param id VolunteerId to identify a volunteer in our database.
  * @returns A single volunteer.
  */
@@ -22,6 +23,7 @@ export const getVolunteer = async function (id: string) {
 };
 
 /**
+ * Adds a volunteer to database.
  * @param vol The volunteer to insert into our database.
  */
 export const addVolunteer = async function (vol: Volunteer) {
@@ -31,6 +33,23 @@ export const addVolunteer = async function (vol: Volunteer) {
     }
 
     await VolunteerSchema.create(vol);
+};
+
+/**
+ * Updates a volunteer that already exists in database.
+ * @param id The _id of the volunteer we want to update.
+ * @param vol The new volunteer object to insert into database.
+ */
+export const updateVolunteer = async function (id: string, vol: Volunteer) {
+    await mongoDB();
+    if (!id || !vol) {
+        throw new APIError(400, "Invalid past volunteer or invalid new volunteer.");
+    }
+
+    const model = await VolunteerSchema.findByIdAndUpdate(id, vol);
+    if (!model) {
+        throw new APIError(404, "Volunteer not found.");
+    }
 };
 
 /**
