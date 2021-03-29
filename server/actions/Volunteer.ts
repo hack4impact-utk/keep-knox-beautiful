@@ -43,7 +43,7 @@ export const addVolunteer = async function (vol: Volunteer) {
 export const updateVolunteer = async function (id: string, vol: Volunteer) {
     await mongoDB();
     if (!id || !vol) {
-        throw new APIError(400, "Invalid past volunteer or invalid new volunteer.");
+        throw new APIError(400, "Invalid previous volunteer or invalid new volunteer.");
     }
 
     const model = await VolunteerSchema.findByIdAndUpdate(id, vol);
