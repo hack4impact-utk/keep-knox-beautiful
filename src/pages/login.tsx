@@ -28,12 +28,15 @@ function Login() {
         if (email.current!.value == "success@gmail.com" && password.current!.value == "123") {
             setLoading(false);
             setValidLogin(true);
-            console.log("successful login");
             await router.push("/admin");
         } else {
             setLoading(false);
             setValidLogin(false);
         }
+    };
+
+    const onForgotPassword = async () => {
+        console.log("forgot password");
     };
 
     return (
@@ -84,7 +87,7 @@ function Login() {
                         <CoreTypography variant="button">LOGIN</CoreTypography>
                     </Button>
                 </form>
-                <Link className={styles.forgotPassword}>
+                <Link onClick={onForgotPassword} className={styles.forgotPassword}>
                     <CoreTypography variant="caption">FORGOT PASSWORD?</CoreTypography>
                 </Link>
             </Container>
