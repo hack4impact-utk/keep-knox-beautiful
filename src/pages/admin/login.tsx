@@ -113,11 +113,10 @@ const useStyles = makeStyles((theme: Theme) =>
 
         button: {
             borderRadius: "56px",
-            marginTop: "30px",
-            backgroundColor: "#F58647", // CODE THIS SOMEWHERELASKDJFLKSADJFLSA;JFL;SADJFSLA;KDFJSDALKJFSALD;F
+            backgroundColor: theme.palette.accent.main,
             color: colors.white,
             "&:hover": {
-                backgroundColor: "#F58647", //AND THIS ONE SLJKDFHSLDFJHSKDLAFHKSALDFHASKDJF
+                backgroundColor: theme.palette.accent.main,
             },
         },
 
