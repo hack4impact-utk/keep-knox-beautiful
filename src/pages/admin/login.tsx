@@ -1,20 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Link from "@material-ui/core/Link";
 import CoreTypography from "src/components/core/typography";
 import colors from "src/components/core/colors";
 import constants from "utils/constants";
-import { Button } from "@material-ui/core";
+import { Button, CircularProgress } from "@material-ui/core";
 import LockIcon from "@material-ui/icons/Lock";
 import PersonIcon from "@material-ui/icons/Person";
 
 function Login() {
     const styles = useStyles();
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLoading(true);
         console.log("signed in");
+        setLoading(false);
     };
 
     return (
@@ -28,7 +31,7 @@ function Login() {
 
                 <CoreTypography variant="h2">Welcome Back!</CoreTypography>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form onSubmit={onSubmit} className={styles.form}>
                     <input
                         type="email"
                         name="email"
@@ -48,6 +51,8 @@ function Login() {
                         id="passwordField"
                     />
                     <LockIcon className={styles.icon} />
+
+                    {loading && <CircularProgress color="secondary" style={{ alignSelf: "center" }} />}
 
                     <Button variant="contained" type="submit" className={styles.button}>
                         <CoreTypography variant="button">LOGIN</CoreTypography>
