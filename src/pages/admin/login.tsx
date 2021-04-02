@@ -70,7 +70,9 @@ const useStyles = makeStyles((theme: Theme) =>
             textAlign: "center",
             alignItems: "center",
             justifyContent: "center",
-            width: "900px",
+            marginLeft: "50px",
+            marginRight: "50px",
+            height: "100%",
         },
 
         banner: {
@@ -89,7 +91,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
         icon: {
             position: "relative",
-            bottom: "32px",
+            bottom: "47px",
             left: "7px",
             color: colors.grays["60"],
         },
@@ -99,10 +101,10 @@ const useStyles = makeStyles((theme: Theme) =>
             fontSize: "17px",
             borderStyle: "solid",
             textIndent: "35px",
-
+            marginBottom: "15px",
             "&:focus": {
                 outline: "none",
-                borderColor: "#33A3C8", //ALSO CHANGE THIS TO BLUE ????????
+                borderColor: colors.blue,
             },
         },
 
@@ -113,6 +115,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
         button: {
             borderRadius: "56px",
+            marginTop: "15px",
             backgroundColor: theme.palette.accent.main,
             color: colors.white,
             "&:hover": {
