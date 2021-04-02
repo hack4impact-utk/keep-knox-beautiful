@@ -26,9 +26,9 @@ function Login() {
         // TODO integrate the correct checks here
 
         if (email.current!.value == "success@gmail.com" && password.current!.value == "123") {
-            setLoading(false);
             setValidLogin(true);
             await router.push("/admin");
+            setLoading(false);
         } else {
             setLoading(false);
             setValidLogin(false);
