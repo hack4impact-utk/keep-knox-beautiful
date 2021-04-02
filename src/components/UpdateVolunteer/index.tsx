@@ -38,7 +38,7 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
         firstName: existingVol.name.split(" ")[0],
         lastName: existingVol.name.split(" ")[1],
         email: existingVol.email,
-        phoneNumber: existingVol.phone || "",
+        phoneNumber: existingVol.phone,
     });
     const router = useRouter();
 
@@ -46,10 +46,10 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
         setValues(values => ({ ...values, [event.target.id]: event.target.value }));
     };
 
-    const handleInputMaskChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputMaskChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         event.preventDefault();
-        setValues(values => ({ ...values, ["phoneNumber"]: event.target.value }));
+        setValues(values => ({ ...values, ["phoneNumber"]: event.target?.value }));
     };
 
     // handle form submission, essentially just creating formdata to send
@@ -93,7 +93,7 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
     return (
         <>
             <Container maxWidth="xl" className={styles.pageHeader}>
-                <CoreTypography variant="h1">Add New Event</CoreTypography>
+                <CoreTypography variant="h1">Update Volunteer Info</CoreTypography>
             </Container>
 
             <Container maxWidth="xl" className={styles.bodyWrapper}>
@@ -130,19 +130,15 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
                                 color="secondary"
                                 onChange={handleTextChange}
                             />
-                            <TextField
-                                id="phoneNumber"
-                                label="Phone Number"
-                                type="string"
-                                rowsMax={4}
-                                color="secondary"
+                            <InputMask
+                                mask="(999) 999-9999"
+                                onChange={handleInputMaskChange}
+                                value={values.phoneNumber}
                             >
-                                <InputMask
-                                    mask="(000) 000-0000"
-                                    value={values.phoneNumber}
-                                    onChange={handleInputMaskChange}
-                                />
-                            </TextField>
+                                {() => (
+                                    <TextField id="phonenumber" label="Phone Number" rowsMax={4} color="secondary" />
+                                )}
+                            </InputMask>
                         </div>
                         <CoreTypography variant="body2" className={styles.error} style={{ marginTop: "40px" }}>
                             {errors.submissionError && errorConstants.FORM_SUBMISSION_ERROR}
