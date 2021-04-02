@@ -3,6 +3,7 @@ import VolunteerEventsList from "../../../../components/VolunteerEventsList";
 import { getVolunteer } from "server/actions/Volunteer";
 import { Volunteer } from "utils/types";
 import { GetStaticPropsContext, NextPage } from "next";
+import { Router, useRouter } from "next/router";
 import Error from "next/error";
 import constants from "utils/constants";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
@@ -20,12 +21,19 @@ interface Props {
 
 const VolunteerPage: NextPage<Props> = ({ vol }) => {
     const classes = useStyles();
+    const router = useRouter();
 
     if (!vol) {
         return <Error statusCode={404} />;
     }
 
     const firstName = vol.name.split(" ")[0];
+
+    const handleEditClick = async () => {
+        if (vol._id) {
+            await router.push(`/admin/volunteers/${vol._id}/update`);
+        }
+    };
 
     return (
         <>
@@ -37,8 +45,12 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
                                 <div className={classes.nameCardTopRow}>
                                     {vol.name}
                                     <div>
-                                        <EditIcon style={{ verticalAlign: "top", marginRight: "5px" }} />
-                                        <DeleteIcon style={{ verticalAlign: "top", marginRight: "5px" }} />
+                                        <button className={classes.navIcon} onClick={handleEditClick}>
+                                            <EditIcon />
+                                        </button>
+                                        <button className={classes.navIcon}>
+                                            <DeleteIcon />
+                                        </button>
                                     </div>
                                 </div>
                             </CoreTypography>
@@ -228,6 +240,15 @@ const useStyles = makeStyles((theme: Theme) =>
             borderRadius: "10px",
             [theme.breakpoints.between(0, "sm")]: {
                 padding: "0 4px",
+            },
+        },
+        navIcon: {
+            border: "none",
+            backgroundColor: "inherit",
+            outline: "none",
+            verticalAlign: "top",
+            "&:active": {
+                transform: "scale(0.75)",
             },
         },
     })

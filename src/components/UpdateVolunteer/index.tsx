@@ -81,7 +81,9 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
         if (response) {
             if (response.success) {
                 // TODO redirect to admin home page
-                await router.push("/");
+                if (existingVol._id) {
+                    await router.push(`/admin/volunteers/${existingVol._id}`);
+                }
             } else {
                 setErrors(errors => ({ ...errors, ["submissionError"]: true }));
             }
