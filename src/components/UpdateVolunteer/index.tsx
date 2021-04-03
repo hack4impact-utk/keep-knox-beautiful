@@ -15,9 +15,9 @@ import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
 
 interface IFormValues {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
+    firstName: string;
+    lastName: string;
+    email: string;
     phoneNumber?: string;
     [key: string]: string | undefined;
 }
@@ -37,7 +37,7 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
     const [values, setValues] = useState<IFormValues>({
         firstName: existingVol.name.split(" ")[0],
         lastName: existingVol.name.split(" ")[1],
-        email: existingVol.email,
+        email: existingVol.email || "",
         phoneNumber: existingVol.phone,
     });
     const router = useRouter();
@@ -63,18 +63,22 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
 
         setLoading(true);
         const formdata = new FormData();
-        let key: string;
-        for (key in values) {
-            formdata.append(key, values[key] as string);
-        }
+        const name = `${values.firstName} ${values.lastName}`;
+        formdata.append("name", name);
+        formdata.append("email", values.email);
+        formdata.append("phone", values.phoneNumber as string);
 
         // update volunteer info
-        const r = await fetch(urls.api.volunteer(existingVol._id || ""), {
-            method: "POST",
-            body: formdata,
-        });
+        let r;
+        let response;
+        if (existingVol && existingVol._id) {
+            r = await fetch(urls.api.volunteer(existingVol._id), {
+                method: "POST",
+                body: formdata,
+            });
 
-        const response = (await r.json()) as ApiResponse;
+            response = (await r.json()) as ApiResponse;
+        }
         setLoading(false);
 
         // error check response
@@ -153,7 +157,7 @@ const UpdateVolunteer: React.FC<Props> = ({ existingVol }) => {
                             className={styles.button}
                             style={{ marginTop: "40px", float: "right" }}
                         >
-                            <CoreTypography variant="button">Update Event</CoreTypography>
+                            <CoreTypography variant="button">Update Volunteer</CoreTypography>
                         </Button>
                     </form>
                 </Container>
