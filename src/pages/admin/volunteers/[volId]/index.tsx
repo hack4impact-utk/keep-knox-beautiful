@@ -6,6 +6,7 @@ import { GetStaticPropsContext, NextPage } from "next";
 import { Router, useRouter } from "next/router";
 import Error from "next/error";
 import constants from "utils/constants";
+import urls from "utils/urls";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { Paper } from "@material-ui/core";
 import CoreTypography from "src/components/core/typography";
@@ -31,7 +32,7 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
 
     const handleEditClick = async () => {
         if (vol._id) {
-            await router.push(`/admin/volunteers/${vol._id}/update`);
+            await router.push(urls.pages.updateVolunteer(vol._id));
         }
     };
 
