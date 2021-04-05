@@ -22,6 +22,7 @@ import { getVolunteersForAdmin } from "server/actions/Volunteer";
 import colors from "src/components/core/colors";
 import constants from "utils/constants";
 import { Volunteer } from "utils/types";
+import urls from "utils/urls";
 
 interface Props {
     vols: Volunteer[];
@@ -94,7 +95,7 @@ const VolunteersPage: NextPage<Props> = ({ vols }) => {
                             </TableHead>
                             <TableBody>
                                 {getVolsFromSearch(search).map(vol => (
-                                    <Link href={`/volunteers/${vol._id!}`} passHref key={vol._id}>
+                                    <Link href={urls.pages.volunteer(vol._id!)} passHref key={vol._id}>
                                         <TableRow className={styles.tr} hover>
                                             <TableCell>{vol.name}</TableCell>
                                             <TableCell align="right">{vol.email}</TableCell>

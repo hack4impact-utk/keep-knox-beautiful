@@ -4,6 +4,7 @@ import Container from "@material-ui/core/Container";
 import constants from "utils/constants";
 import { Button, Link } from "@material-ui/core";
 import colors from "../core/colors";
+import urls from "utils/urls";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -18,10 +19,10 @@ const AdminHeader: React.FC = () => {
 
     return (
         <>
-            <Link href="/admin/events">
+            <Link href={urls.pages.events}>
                 <Button className={styles.link}>Events</Button>
             </Link>
-            <Link href="/admin/volunteers">
+            <Link href={urls.pages.volunteers}>
                 <Button className={styles.link}>Volunteers</Button>
             </Link>
         </>
