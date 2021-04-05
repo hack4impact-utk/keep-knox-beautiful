@@ -51,7 +51,11 @@ const VolunteersPage: NextPage<Props> = ({ vols }) => {
     function getVolsFromSearch(query: string): Volunteer[] {
         if (query == "") return vols;
         // this search is pretty basic, but i think it works
-        return vols.filter(vol => vol.name.indexOf(query) !== -1 || vol.email?.indexOf(query) !== -1);
+        return vols.filter(
+            vol =>
+                vol.name.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
+                vol.email?.toLowerCase().indexOf(query.toLowerCase()) !== -1
+        );
     }
 
     const styles = useStyles();
