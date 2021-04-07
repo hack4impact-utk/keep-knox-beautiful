@@ -252,7 +252,7 @@ export const getVolunteerEvents = async function (volId: string, page: number) {
         throw new APIError(404, "Volunteer not found.");
     }
     return (volunteer.attendedEvents as unknown) as Event[];
-}
+};
 
 /*
  * Sends an email to the volunteer. The email contains
@@ -302,7 +302,7 @@ export const sendVerificationEmail = async function (volId: string) {
 };
 
 /**
- * Internally used function that returns the email body that contains a volunteer's 
+ * Internally used function that returns the email body that contains a volunteer's
  * attended event information.
  * @param volunteer The populated volunteer object whose data will be used to
  * constuct the email.
