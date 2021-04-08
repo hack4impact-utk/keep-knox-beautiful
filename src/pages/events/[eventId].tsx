@@ -1,5 +1,3 @@
-import Header from "src/components/Header";
-import Footer from "src/components/Footer";
 import { getEvent } from "server/actions/Event";
 import { Event } from "utils/types";
 import { GetStaticPropsContext, NextPage } from "next";
@@ -67,51 +65,59 @@ const EventPage: NextPage<Props> = ({ event }) => {
                 />
                 <CoreTypography variant="h1">Event Description</CoreTypography>
             </Container>
-            <Container maxWidth="xl" className={styles.eventName}>
-                <CoreTypography variant="h2"> {event.name} </CoreTypography>
-            </Container>
-            <Container maxWidth="xl" className={styles.bodyContainer}>
-                <div className={styles.dateContainer}>
-                    <Card className={styles.card}>
-                        <CardContent>
-                            <div className={styles.cardTitle}>
-                                <ScheduleIcon className={styles.titleIcon} />
-                                <CoreTypography variant="h5" className={styles.titleName}>
-                                    Event Time
-                                </CoreTypography>
-                            </div>
-                            <CoreTypography variant="subtitle1" className={styles.cardText}>
-                                {getTime()}
-                            </CoreTypography>
-                        </CardContent>
-                    </Card>
-                    <Card className={styles.card}>
-                        <CardContent>
-                            <div className={styles.cardTitle}>
-                                <LocationOnIcon className={styles.titleIcon} />
-                                <CoreTypography variant="h5" className={styles.titleName}>
-                                    Location
-                                </CoreTypography>
-                            </div>
-                            <CoreTypography variant="subtitle1" className={styles.cardText}>
-                                {event.location}
-                            </CoreTypography>
-                        </CardContent>
-                    </Card>
-                </div>
+
+            <Container className={styles.leftWrapper}>
+                <img src={event.image?.url} alt={`${event.name} img`} style={{ width: 350 }} />
+                <Container maxWidth="xl" className={`${styles.eventName} ${styles.caption}`}>
+                    <Container maxWidth="sm">
+                        <CoreTypography variant="h4"> {event.caption} </CoreTypography>
+                    </Container>
+                </Container>
                 <div
                     className={styles.descContainer}
                     dangerouslySetInnerHTML={{ __html: event.description as string }}
                 ></div>
             </Container>
-            <Container maxWidth="xl" className={`${styles.eventName} ${styles.caption}`}>
-                <Container maxWidth="sm">
-                    <CoreTypography variant="h4"> {event.caption} </CoreTypography>
-                </Container>
-            </Container>
 
-            <Container maxWidth="xl" className={styles.signUpForm}>
-                <EventSignUp id={event._id as string} />
+            <Container className={styles.rightWrapper}>
+                <Container maxWidth="xl" className={styles.eventName}>
+                    <CoreTypography variant="h2"> {event.name} </CoreTypography>
+                </Container>
+
+                <Container maxWidth="xl" className={styles.bodyContainer}>
+                    <div className={styles.dateContainer}>
+                        <Card className={styles.card}>
+                            <CardContent>
+                                <div className={styles.cardTitle}>
+                                    <ScheduleIcon className={styles.titleIcon} />
+                                    <CoreTypography variant="h5" className={styles.titleName}>
+                                        Event Time
+                                    </CoreTypography>
+                                </div>
+                                <CoreTypography variant="subtitle1" className={styles.cardText}>
+                                    {getTime()}
+                                </CoreTypography>
+                            </CardContent>
+                        </Card>
+                        <Card className={styles.card}>
+                            <CardContent>
+                                <div className={styles.cardTitle}>
+                                    <LocationOnIcon className={styles.titleIcon} />
+                                    <CoreTypography variant="h5" className={styles.titleName}>
+                                        Location
+                                    </CoreTypography>
+                                </div>
+                                <CoreTypography variant="subtitle1" className={styles.cardText}>
+                                    {event.location}
+                                </CoreTypography>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Container>
+
+                <Container maxWidth="xl" className={styles.signUpForm}>
+                    <EventSignUp id={event._id as string} />
+                </Container>
             </Container>
         </>
     );
@@ -174,12 +180,17 @@ const useStyles = makeStyles((theme: Theme) =>
             marginTop: "50px",
             marginBottom: "50px",
         },
+
+        leftWrapper: {},
+
+        rightWrapper: {},
+
         bodyContainer: {
             [theme.breakpoints.down("sm")]: {
                 flexDirection: "column",
                 alignItems: "center",
             },
-            backgroundColor: theme.palette.primary.light,
+            //backgroundColor: theme.palette.primary.light,
             display: "flex",
             justifyContent: "center",
         },
