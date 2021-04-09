@@ -114,7 +114,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
                         </Card>
                     </div>
 
-                    <Container>
+                    <Container className={styles.signUpHeader}>
                         <CoreTypography variant="h4" style={{ float: "left" }}>
                             Sign Up to Volunteer
                         </CoreTypography>
@@ -215,7 +215,7 @@ const useStyles = makeStyles((theme: Theme) =>
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            width: "800px",
+            width: "700px",
         },
 
         cardContainer: {
@@ -232,6 +232,10 @@ const useStyles = makeStyles((theme: Theme) =>
             margin: "20px",
             marginRight: "30px",
             borderRadius: 8,
+        },
+
+        signUpHeader: {
+            marginTop: "20px",
         },
 
         descContainer: {

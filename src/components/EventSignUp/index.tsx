@@ -154,6 +154,7 @@ const useStyles = makeStyles((theme: Theme) =>
         container: {
             display: "flex",
             paddingLeft: "0",
+            paddingRight: "0",
             flexDirection: "column",
             //[theme.breakpoints.between(0, "sm")]: {
             //    flexDirection: "column",
