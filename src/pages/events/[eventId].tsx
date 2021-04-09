@@ -85,35 +85,46 @@ const EventPage: NextPage<Props> = ({ event }) => {
                         <CoreTypography variant="h2"> {event.name} </CoreTypography>
                     </Container>
 
-                    <Container maxWidth="xl" className={styles.bodyContainer}>
-                        <div className={styles.cardContainer}>
-                            <Card className={styles.card}>
-                                <CardContent>
-                                    <div className={styles.cardTitle}>
-                                        <ScheduleIcon className={styles.titleIcon} />
-                                        <CoreTypography variant="h5" className={styles.titleName}>
-                                            Event Time
-                                        </CoreTypography>
-                                    </div>
-                                    <CoreTypography variant="subtitle1" className={styles.cardText}>
-                                        {getTime()}
+                    <div className={styles.cardContainer}>
+                        <Card className={styles.card}>
+                            <CardContent>
+                                <div className={styles.cardTitle}>
+                                    <ScheduleIcon className={styles.titleIcon} />
+                                    <CoreTypography variant="h5" className={styles.titleName}>
+                                        Event Time
                                     </CoreTypography>
-                                </CardContent>
-                            </Card>
-                            <Card className={styles.card}>
-                                <CardContent>
-                                    <div className={styles.cardTitle}>
-                                        <LocationOnIcon className={styles.titleIcon} />
-                                        <CoreTypography variant="h5" className={styles.titleName}>
-                                            Location
-                                        </CoreTypography>
-                                    </div>
-                                    <CoreTypography variant="subtitle1" className={styles.cardText}>
-                                        {event.location}
+                                </div>
+                                <CoreTypography variant="subtitle1" className={styles.cardText}>
+                                    {getTime()}
+                                </CoreTypography>
+                            </CardContent>
+                        </Card>
+                        <Card className={styles.card}>
+                            <CardContent>
+                                <div className={styles.cardTitle}>
+                                    <LocationOnIcon className={styles.titleIcon} />
+                                    <CoreTypography variant="h5" className={styles.titleName}>
+                                        Location
                                     </CoreTypography>
-                                </CardContent>
-                            </Card>
-                        </div>
+                                </div>
+                                <CoreTypography variant="subtitle1" className={styles.cardText}>
+                                    {event.location}
+                                </CoreTypography>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <Container>
+                        <CoreTypography variant="h4" style={{ float: "left" }}>
+                            Sign Up to Volunteer
+                        </CoreTypography>
+                        <CoreTypography variant="h4" style={{ float: "right", paddingBottom: "10px" }}>
+                            {event.volunteerCount}/{event.maxVolunteers} &nbsp;
+                            <CoreTypography variant="h5" style={{ float: "right" }}>
+                                signed up
+                            </CoreTypography>
+                        </CoreTypography>
+                        <hr style={{ width: "100%", height: "3px", backgroundColor: colors.grays[80] }} />
                     </Container>
 
                     <Container maxWidth="xl" className={styles.signUpForm}>
@@ -172,7 +183,7 @@ const useStyles = makeStyles((theme: Theme) =>
             marginRight: "20px",
         },
         eventName: {
-            textAlign: "left",
+            textAlign: "center",
             minHeight: "110px",
             display: "flex",
             alignItems: "center",
@@ -195,22 +206,23 @@ const useStyles = makeStyles((theme: Theme) =>
         },
 
         rightWrapper: {
-            paddingLeft: "100px",
+            //[theme.breakpoints.down("sm")]: {
+            //  flexDirection: "column",
+            //alignItems: "center",
+            //},
+            //padding: "0",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            width: "800px",
         },
 
-        bodyContainer: {
-            [theme.breakpoints.down("sm")]: {
-                flexDirection: "column",
-                alignItems: "center",
-            },
-            //backgroundColor: theme.palette.primary.light,
-            display: "flex",
-            justifyContent: "center",
-        },
         cardContainer: {
             [theme.breakpoints.down("sm")]: {
                 flexDirection: "column",
             },
+            padding: "0",
             display: "flex",
             flexDirection: "row",
         },
@@ -221,6 +233,7 @@ const useStyles = makeStyles((theme: Theme) =>
             marginRight: "30px",
             borderRadius: 8,
         },
+
         descContainer: {
             width: "500px",
             padding: "20px",
