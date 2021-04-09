@@ -3,6 +3,24 @@ import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import constants from "utils/constants";
 
+const Header: React.FC = () => {
+    const styles = useStyles();
+
+    return (
+        <React.Fragment>
+            <Container maxWidth="xl" className={styles.container}>
+                <a href="/">
+                    <img
+                        src={`/${constants.org.images.banner}`}
+                        className={styles.headerBanner}
+                        alt={`${constants.org.name.short} banner`}
+                    ></img>
+                </a>
+            </Container>
+        </React.Fragment>
+    );
+};
+
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         container: {
@@ -19,21 +37,5 @@ const useStyles = makeStyles((theme: Theme) =>
         },
     })
 );
-
-const Header: React.FC = () => {
-    const styles = useStyles();
-
-    return (
-        <React.Fragment>
-            <Container maxWidth="xl" className={styles.container}>
-                <img
-                    src={`/${constants.org.images.banner}`}
-                    className={styles.headerBanner}
-                    alt={`${constants.org.name.short} banner`}
-                ></img>
-            </Container>
-        </React.Fragment>
-    );
-};
 
 export default Header;

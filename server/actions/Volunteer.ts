@@ -1,8 +1,11 @@
 import mongoDB from "../index";
 import VolunteerSchema from "../models/Volunteer";
 import EventSchema from "../models/Event";
-import { Volunteer, APIError } from "utils/types";
+import { Event, Volunteer, APIError } from "utils/types";
 import { escapeRegExp } from "utils/util";
+import { createTransport } from "nodemailer";
+import constants from "utils/constants";
+import { format } from "date-fns";
 
 // only return these fields from mongodb
 const VOL_FIELDS = {
@@ -36,10 +39,13 @@ export const getVolunteer = async function (id: string) {
  */
 export const getVolunteers = async function (page: number, search = "") {
     await mongoDB();
-    if (isNaN(page) || page < 0) {
+    const VOLS_PER_PAGE = 6;
+
+    // error check page and set it to be offset from 0 (1st page will return the 0th offset of data)
+    if (isNaN(page) || page < 1) {
         throw new APIError(400, "Invalid page number.");
     }
-    const VOLS_PER_PAGE = 6;
+    page -= 1;
 
     // optional search, ignores case
     const vols = await VolunteerSchema.find(
@@ -227,4 +233,129 @@ export const markVolunteerNotPresent = async function (volId: string, eventId: s
     });
 
     await Promise.all([volPromise, eventPromise]);
+};
+
+/**
+ * This function returns a subset of a single volunteer's events.
+ * @param volId The id of the volunteer whose events will be fetched.
+ * @param page Since this data is paginated, page is used to return a certain subset of the data.
+ */
+export const getVolunteerEvents = async function (volId: string, page: number) {
+    await mongoDB();
+    const EVENTS_PER_PAGE = 3;
+    const EVENT_FIELDS = { _id: 1, name: 1, startDate: 1, hours: 1 };
+
+    if (!volId) {
+        throw new APIError(400, "Invalid volunteer id.");
+    }
+
+    // error check page and set it to be offset from 0 (1st page will return the 0th offset of data)
+    if (isNaN(page) || page < 1) {
+        throw new APIError(400, "Invalid page number.");
+    }
+    page -= 1;
+
+    const volunteer = (await VolunteerSchema.findById(volId).populate({
+        path: "attendedEvents",
+        select: EVENT_FIELDS,
+        options: {
+            sort: { startDate: -1, name: 1 },
+            skip: page * EVENTS_PER_PAGE,
+            limit: EVENTS_PER_PAGE,
+        },
+    })) as Volunteer;
+
+    if (!volunteer) {
+        throw new APIError(404, "Volunteer not found.");
+    }
+    return (volunteer.attendedEvents as unknown) as Event[];
+}
+
+/*
+ * Sends an email to the volunteer. The email contains
+ * 1. how many total hours the volunteer volunteered for
+ * 2. how many events the volunteer volunteered at
+ * 3. which events the volunteer attended
+ * 4. the start date of the event
+ * 5. how many hours each event was that the volunteer attended
+ * @param volId The volunteer id of the volunteer that the email should be sent to
+ */
+export const sendVerificationEmail = async function (volId: string) {
+    if (!volId) {
+        throw new APIError(400, "Invalid id.");
+    }
+
+    const EVENT_FIELDS = { name: 1, hours: 1, startDate: 1 };
+    const volunteer = await VolunteerSchema.findById(volId)
+        .populate({
+            path: "attendedEvents",
+            select: EVENT_FIELDS,
+            options: {
+                sort: { startDate: 1, name: 1 },
+            },
+        })
+        .lean();
+
+    if (!volunteer) {
+        throw new APIError(404, "Volunteer not found.");
+    }
+
+    const body = await createEmailBody(volunteer);
+    const transporter = createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_ADDRESS,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+    const mailOptions = {
+        from: process.env.EMAIL_ADDRESS,
+        to: volunteer.email,
+        subject: `${constants.org.name.full} Volunteer Verification`,
+        text: body,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+
+/**
+ * Internally used function that returns the email body that contains a volunteer's 
+ * attended event information.
+ * @param volunteer The populated volunteer object whose data will be used to
+ * constuct the email.
+ */
+export const createEmailBody = async function (volunteer: Volunteer) {
+    if (!volunteer.attendedEvents) {
+        return "";
+    }
+
+    // create the section that contains which events the volunteer attended
+    const eventArray: string[] = [];
+    for (let i = 0; i < volunteer.attendedEvents.length; i++) {
+        const event = volunteer.attendedEvents[i] as Event;
+        const formattedDate = event.startDate ? format(event.startDate, "MMMM dd, yyyy") : "Unknown date";
+
+        eventArray.push(`       ${event.name} - ${formattedDate} - ${event.hours || 0} hours`);
+    }
+    const eventsText = eventArray.join("\n");
+
+    // return the entire email body
+    return `${volunteer.name},
+
+        Thank you for helping Keep Knoxville Beautiful for a total of ${volunteer.totalHours || 0} hours \
+        across ${volunteer.totalEvents || 0} events! We seriously thank you for your excellent service to the community.
+
+        The following is a list of events you volunteered at:
+        ${eventsText}
+
+        Keep Knoxville Beautiful is a 501(c)(3) nonprofit organization with a mission to inspire and empower Knox County \
+        communities to improve their quality of life through beautification and environmental stewardship. For more \
+        information on our organization, please visit keepknoxvillebeautiful.org. If you have any questions or concerns, \
+        please contact me at alanna@keepknoxvillebeautiful.org or 865-521-6957. Thank you.
+        
+        Sincerely,
+
+        Alanna McKissack
+        Executive Director
+    `.replace(/ {8}/g, "");
 };
