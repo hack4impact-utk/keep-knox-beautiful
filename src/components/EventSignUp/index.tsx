@@ -67,100 +67,85 @@ const EventSignUp: React.FC<Props> = ({ id }) => {
     };
 
     return (
-        <React.Fragment>
+        <>
             <Container className={styles.container}>
-                <Container className={styles.leftWrapper}>
-                    <CoreTypography variant="h1" className={styles.textWrapper}>
-                        Sign Up
-                    </CoreTypography>
-                    <CoreTypography variant="h2" className={styles.textWrapper}>
-                        We&#39;d love for you <br></br>to join us!
-                    </CoreTypography>
-                </Container>
-                <Container className={styles.rightWrapper}>
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        <label htmlFor="firstNameField">
-                            <CoreTypography variant="body1" className={styles.inputLabel}>
-                                First Name
-                            </CoreTypography>
-                        </label>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <Container className={styles.nameInputContainer}>
                         <input
                             type="text"
                             name="firstName"
                             ref={firstName}
+                            placeholder="First Name"
                             required
-                            className={styles.input}
+                            className={styles.firstNameInput}
                             id="firstNameField"
                         />
-                        <label htmlFor="lastNameField">
-                            <CoreTypography variant="body1" className={styles.inputLabel} id="lastNameLabel">
-                                Last Name
-                            </CoreTypography>
-                        </label>
                         <input
                             type="text"
                             name="lastName"
                             ref={lastName}
+                            placeholder="Last Name"
                             required
-                            className={styles.input}
+                            className={styles.lastNameInput}
                             id="lastNameField"
                         />
-                        <label htmlFor="emailField">
-                            <CoreTypography variant="body1" className={styles.inputLabel} id="emailLabel">
-                                Email
-                            </CoreTypography>
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            ref={email}
-                            required
-                            className={styles.input}
-                            id="emailField"
-                        />
-                        <label htmlFor="phoneNumberField">
-                            <CoreTypography variant="body1" className={styles.inputLabel} id="phoneNumberLabel">
-                                Phone Number
-                            </CoreTypography>
-                        </label>
-                        <InputMask
-                            mask="(999) 999-9999"
-                            className={styles.input}
-                            onChange={handleInputMaskChange}
-                            name="phoneNumber"
-                            id="phoneNumberField"
-                        />
+                    </Container>
 
-                        <Container className={styles.waiverLinkWrapper}>
-                            <DescriptionIcon htmlColor={colors.grays["60"]} style={{ marginRight: "10px" }} />
-                            <a href="/waiver" className={styles.waiverLink} target="_blank" rel="noreferrer">
-                                <CoreTypography variant="body2">{constants.org.name.short} Volunteer Waiver</CoreTypography>
-                            </a>
-                        </Container>
-                        <Container className={styles.waiverCheckboxWrapper}>
-                            <Checkbox required name="waiverCheckbox" id="waiverCheckbox" color="secondary" />
-                            <label htmlFor="waiverCheckbox">
-                                <CoreTypography variant="body2" className={styles.waiverCheckboxText}>
-                                    By checking this box, I have read and acknowledged the waiver.
-                                </CoreTypography>
-                            </label>
-                        </Container>
-                        {loading && <CircularProgress color="secondary" />}
-                        <Button
-                            variant="contained"
-                            type="submit"
-                            className={styles.button}
-                            style={{ marginTop: "40px", float: "right" }}
-                        >
-                            <CoreTypography variant="button">Sign Up</CoreTypography>
-                        </Button>
-                        <CoreTypography variant="body2" className={styles.error} style={{ marginTop: "10px" }}>
-                            {error}
-                        </CoreTypography>
-                    </form>
+                    <input
+                        type="email"
+                        name="email"
+                        ref={email}
+                        placeholder="Email"
+                        required
+                        className={styles.otherInput}
+                        id="emailField"
+                    />
+
+                    <InputMask
+                        mask="(999) 999-9999"
+                        className={styles.otherInput}
+                        onChange={handleInputMaskChange}
+                        placeholder="Phone Number"
+                        name="phoneNumber"
+                        id="phoneNumberField"
+                    />
+
+                    <Container className={styles.waiverLinkWrapper}>
+                        <DescriptionIcon htmlColor={colors.grays["60"]} style={{ marginRight: "10px" }} />
+                        <a href="/waiver" className={styles.waiverLink} target="_blank" rel="noreferrer">
+                            <CoreTypography variant="body2">{constants.org.name.short} Volunteer Waiver</CoreTypography>
+                        </a>
+                    </Container>
+                    <Container className={styles.waiverCheckboxWrapper}>
+                        <Checkbox required name="waiverCheckbox" id="waiverCheckbox" color="secondary" />
+                        <label htmlFor="waiverCheckbox">
+                            <CoreTypography variant="body2" className={styles.waiverCheckboxText}>
+                                By checking this box, I have read and acknowledged the waiver.
+                            </CoreTypography>
+                        </label>
+                    </Container>
+                    {loading && <CircularProgress color="secondary" />}
+                    <Button
+                        variant="contained"
+                        type="submit"
+                        className={styles.button}
+                        style={{ marginTop: "40px", float: "right" }}
+                    >
+                        <CoreTypography variant="button">Register</CoreTypography>
+                    </Button>
+                    <CoreTypography variant="body2" className={styles.error} style={{ marginTop: "10px" }}>
+                        {error}
+                    </CoreTypography>
+                </form>
+
+                <Container className={styles.donateWrapper}>
+                    <CoreTypography variant="h4">Can&apos;t volunteer?</CoreTypography>
+                    <Button variant="contained" className={styles.donateButton}>
+                        <CoreTypography variant="button">Donate</CoreTypography>
+                    </Button>
                 </Container>
             </Container>
-        </React.Fragment>
+        </>
     );
 };
 
@@ -168,42 +153,14 @@ const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         container: {
             display: "flex",
-            textAlign: "center",
-            width: "750px",
-            borderStyle: "solid",
-            borderWidth: "1px",
-            borderColor: theme.palette.primary.main,
-            height: "auto",
             paddingLeft: "0",
+            flexDirection: "column",
+            //[theme.breakpoints.between(0, "sm")]: {
+            //    flexDirection: "column",
+            //    width: "375px",
+            //},
+        },
 
-            [theme.breakpoints.between(0, "sm")]: {
-                flexDirection: "column",
-                width: "375px",
-            },
-        },
-        leftWrapper: {
-            backgroundColor: theme.palette.primary.main,
-            color: colors.white,
-            paddingTop: "220px",
-            height: "700px",
-            [theme.breakpoints.between(0, "sm")]: {
-                height: "350px",
-                width: "371px",
-                paddingTop: "60px",
-            },
-        },
-        rightWrapper: {
-            paddingTop: "50px",
-            width: "310px",
-            height: "700px",
-
-            [theme.breakpoints.between(0, "sm")]: {
-                width: "375",
-                textAlign: "center",
-                position: "relative",
-                left: "20px",
-            },
-        },
         textWrapper: {
             paddingBottom: "20px",
 
@@ -213,19 +170,59 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         form: {
             textAlign: "left",
+            display: "flex",
+            flexDirection: "column",
         },
-        input: {
-            backgroundColor: colors.lightGray,
-            border: "none",
+
+        nameInputContainer: {
+            padding: "0",
+            position: "relative",
+            display: "inherit",
+        },
+
+        firstNameInput: {
             height: "40px",
             fontSize: "20px",
-            marginLeft: "8px",
+            marginRight: "20px",
+            borderStyle: "solid",
+            textIndent: "10px",
+            marginTop: "15px",
+            width: "50%",
+
+            "&:focus": {
+                outline: "none",
+                borderColor: colors.blue,
+            },
         },
-        inputLabel: {
-            paddingTop: "25px",
-            paddingBottom: "5px",
-            marginLeft: "8px",
+
+        lastNameInput: {
+            height: "40px",
+            fontSize: "20px",
+            borderStyle: "solid",
+            textIndent: "10px",
+            marginTop: "15px",
+            width: "50%",
+            "&:focus": {
+                outline: "none",
+                borderColor: colors.blue,
+            },
         },
+
+        otherInput: {
+            height: "40px",
+            fontSize: "20px",
+            marginRight: "20px",
+
+            borderStyle: "solid",
+            textIndent: "10px",
+            marginTop: "30px",
+            width: "100%",
+            "&:focus": {
+                outline: "none",
+                borderColor: colors.blue,
+            },
+        },
+
         waiverLinkWrapper: {
             display: "flex",
             alignItems: "center",
@@ -253,15 +250,34 @@ const useStyles = makeStyles((theme: Theme) =>
             cursor: "pointer",
         },
         button: {
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: theme.palette.accent.main,
             color: colors.white,
+            width: "100%",
             minWidth: "100px",
+            borderRadius: "10px",
             "&:hover": {
-                backgroundColor: theme.palette.primary.main,
+                backgroundColor: theme.palette.accent.main,
             },
         },
         error: {
             color: theme.palette.error.main,
+        },
+        donateWrapper: {
+            paddingTop: "10px",
+            paddingLeft: "0px",
+            paddingRight: "0px",
+        },
+
+        donateButton: {
+            marginTop: "15px",
+            width: "100%",
+            backgroundColor: theme.palette.accent.light,
+            color: colors.white,
+            minWidth: "100px",
+            borderRadius: "10px",
+            "&:hover": {
+                backgroundColor: theme.palette.accent.light,
+            },
         },
     })
 );
