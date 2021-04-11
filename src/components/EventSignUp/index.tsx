@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import DescriptionIcon from "@material-ui/icons/Description";
-import Link from "@material-ui/core/Link";
 import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -17,14 +16,18 @@ import { Volunteer, ApiResponse } from "utils/types";
 
 interface Props {
     id: string;
+    groupSignUp: boolean;
+    volunteerCount: number;
+    maxVolunteers: number;
 }
 
-const EventSignUp: React.FC<Props> = ({ id }) => {
+const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolunteers }) => {
     const styles = useStyles();
     const router = useRouter();
     const firstName = useRef<HTMLInputElement>(null);
     const lastName = useRef<HTMLInputElement>(null);
     const email = useRef<HTMLInputElement>(null);
+    const [groupCount, setGroupCount] = useState(1);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState("");
@@ -34,36 +37,64 @@ const EventSignUp: React.FC<Props> = ({ id }) => {
         e.preventDefault();
         setLoading(true);
 
-        // creates Volunteer object
-        const volunteer: Volunteer = {
-            name: firstName.current!.value + " " + lastName.current!.value,
-            email: email.current!.value,
-            phone: phoneNumber,
-        };
+        // if field is empty, set groupCount to 1
+        setGroupCount(groupCount ? groupCount : 1);
 
-        const r = await fetch(urls.api.signup(id), {
-            method: "POST",
-            body: JSON.stringify(volunteer),
-        });
-        const response = (await r.json()) as ApiResponse;
-        setLoading(false);
-
-        // error check response
-        if (response) {
-            if (response.success) {
-                await router.push("/");
-            } else {
-                setError(response?.message || errors.GENERIC_ERROR);
-            }
+        if (groupCount + volunteerCount > maxVolunteers || groupCount < 1) {
+            setError("Group size must be between 1 and " + `${maxVolunteers - volunteerCount}` + ".");
+            setLoading(false);
         } else {
-            setError(errors.GENERIC_ERROR);
+            setError("");
+            // creates Volunteer object
+            const volunteer: Volunteer = {
+                name: firstName.current!.value + " " + lastName.current!.value,
+                email: email.current!.value,
+                phone: phoneNumber,
+            };
+
+            const r = await fetch(urls.api.signup(id), {
+                method: "POST",
+                body: JSON.stringify(volunteer),
+            });
+            const response = (await r.json()) as ApiResponse;
+            setLoading(false);
+
+            // error check response
+            if (response) {
+                if (response.success) {
+                    await router.push("/");
+                } else {
+                    setError(response?.message || errors.GENERIC_ERROR);
+                }
+            } else {
+                setError(errors.GENERIC_ERROR);
+            }
         }
+    };
+
+    const handleGroupCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setGroupCount(parseInt(e.target?.value));
     };
 
     const handleInputMaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         e.preventDefault;
         setPhoneNumber(e.target?.value);
+    };
+
+    const groupEvent = () => {
+        if (groupSignUp == true) {
+            return (
+                <input
+                    type="number"
+                    name="groupCount"
+                    onChange={handleGroupCountChange}
+                    placeholder="Group Count (Optional)"
+                    className={styles.otherInput}
+                    id="groupCountField"
+                />
+            );
+        }
     };
 
     return (
@@ -109,6 +140,8 @@ const EventSignUp: React.FC<Props> = ({ id }) => {
                         name="phoneNumber"
                         id="phoneNumberField"
                     />
+
+                    {groupEvent()}
 
                     <Container className={styles.waiverLinkWrapper}>
                         <DescriptionIcon htmlColor={colors.grays["60"]} style={{ marginRight: "10px" }} />

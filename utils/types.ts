@@ -13,6 +13,7 @@ export interface Volunteer {
 }
 
 export interface Event {
+    groupSignUp: boolean;
     _id?: string;
     name: string;
     description?: string;

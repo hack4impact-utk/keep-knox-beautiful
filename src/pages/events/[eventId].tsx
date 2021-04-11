@@ -55,6 +55,43 @@ const EventPage: NextPage<Props> = ({ event }) => {
         }
     };
 
+    const noSignUp = () => {
+        if (event.maxVolunteers != 0) {
+            return (
+                <Container>
+                    <Container className={styles.signUpHeader}>
+                        <CoreTypography variant="h4" style={{ float: "left" }}>
+                            Sign Up to Volunteer
+                        </CoreTypography>
+                        <CoreTypography variant="h4" style={{ float: "right", paddingBottom: "10px" }}>
+                            {event.volunteerCount}/{event.maxVolunteers} &nbsp;
+                            <CoreTypography variant="h5" style={{ float: "right" }}>
+                                signed up
+                            </CoreTypography>
+                        </CoreTypography>
+                        <hr style={{ width: "100%", height: "3px", backgroundColor: colors.grays[80] }} />
+                    </Container>
+                    <Container maxWidth="xl" className={styles.signUpForm}>
+                        <EventSignUp
+                            id={event._id as string}
+                            groupSignUp={event.groupSignUp}
+                            volunteerCount={event.volunteerCount as number}
+                            maxVolunteers={event.maxVolunteers as number}
+                        />
+                    </Container>
+                </Container>
+            );
+        } else {
+            return (
+                <Container>
+                    <CoreTypography variant="body1" style={{ paddingTop: "30px" }}>
+                        Signing up is not required for this event.
+                    </CoreTypography>
+                </Container>
+            );
+        }
+    };
+
     return (
         <>
             <Container maxWidth="xl" className={styles.eventHeader}>
@@ -114,22 +151,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
                         </Card>
                     </div>
 
-                    <Container className={styles.signUpHeader}>
-                        <CoreTypography variant="h4" style={{ float: "left" }}>
-                            Sign Up to Volunteer
-                        </CoreTypography>
-                        <CoreTypography variant="h4" style={{ float: "right", paddingBottom: "10px" }}>
-                            {event.volunteerCount}/{event.maxVolunteers} &nbsp;
-                            <CoreTypography variant="h5" style={{ float: "right" }}>
-                                signed up
-                            </CoreTypography>
-                        </CoreTypography>
-                        <hr style={{ width: "100%", height: "3px", backgroundColor: colors.grays[80] }} />
-                    </Container>
-
-                    <Container maxWidth="xl" className={styles.signUpForm}>
-                        <EventSignUp id={event._id as string} />
-                    </Container>
+                    {noSignUp()}
                 </Container>
             </Container>
         </>
