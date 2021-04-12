@@ -55,6 +55,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
         }
     };
 
+    // if signups are not required
     const noSignUp = () => {
         if (event.maxVolunteers != 0) {
             return (
@@ -102,7 +103,6 @@ const EventPage: NextPage<Props> = ({ event }) => {
                 />
                 <CoreTypography variant="h1">Event Description</CoreTypography>
             </Container>
-
             <Container className={styles.contentContainer}>
                 <Container className={styles.leftWrapper}>
                     <img src={event.image?.url} alt={`${event.name} img`} style={{ width: 400 }} />
@@ -116,12 +116,10 @@ const EventPage: NextPage<Props> = ({ event }) => {
                         dangerouslySetInnerHTML={{ __html: event.description as string }}
                     ></div>
                 </Container>
-
                 <Container className={styles.rightWrapper}>
                     <Container maxWidth="xl" className={styles.eventName}>
                         <CoreTypography variant="h2"> {event.name} </CoreTypography>
                     </Container>
-
                     <div className={styles.cardContainer}>
                         <Card className={styles.card}>
                             <CardContent>
@@ -150,7 +148,6 @@ const EventPage: NextPage<Props> = ({ event }) => {
                             </CardContent>
                         </Card>
                     </div>
-
                     {noSignUp()}
                 </Container>
             </Container>
@@ -215,35 +212,28 @@ const useStyles = makeStyles((theme: Theme) =>
             marginTop: "50px",
             marginBottom: "50px",
         },
-
         contentContainer: {
             display: "flex",
             paddingTop: "100px",
+            paddingBottom: "100px",
+            [theme.breakpoints.between(0, "sm")]: {
+                flexDirection: "column",
+            },
         },
-
         leftWrapper: {
             display: "inherit",
             flexDirection: "column",
             alignItems: "center",
         },
-
         rightWrapper: {
-            //[theme.breakpoints.down("sm")]: {
-            //  flexDirection: "column",
-            //alignItems: "center",
-            //},
-            //padding: "0",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            width: "700px",
+            maxWidth: "700px",
+            minWidth: "400px",
         },
-
         cardContainer: {
-            [theme.breakpoints.down("sm")]: {
-                flexDirection: "column",
-            },
             padding: "0",
             display: "flex",
             flexDirection: "row",
@@ -255,11 +245,9 @@ const useStyles = makeStyles((theme: Theme) =>
             marginRight: "30px",
             borderRadius: 8,
         },
-
         signUpHeader: {
             marginTop: "20px",
         },
-
         descContainer: {
             width: "500px",
             padding: "20px",

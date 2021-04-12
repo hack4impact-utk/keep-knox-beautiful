@@ -44,6 +44,7 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
             phone: phoneNumber,
         };
 
+        console.log(JSON.stringify({ volunteer, groupCount }));
         const r = await fetch(urls.api.signup(id), {
             method: "POST",
             body: JSON.stringify({ volunteer, groupCount }),
@@ -114,7 +115,6 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
                             id="lastNameField"
                         />
                     </Container>
-
                     <input
                         type="email"
                         name="email"
@@ -124,7 +124,6 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
                         className={styles.otherInput}
                         id="emailField"
                     />
-
                     <InputMask
                         mask="(999) 999-9999"
                         className={styles.otherInput}
@@ -133,9 +132,7 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
                         name="phoneNumber"
                         id="phoneNumberField"
                     />
-
                     {groupEvent()}
-
                     <Container className={styles.waiverLinkWrapper}>
                         <DescriptionIcon htmlColor={colors.grays["60"]} style={{ marginRight: "10px" }} />
                         <a href="/waiver" className={styles.waiverLink} target="_blank" rel="noreferrer">
@@ -163,7 +160,6 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
                         {error}
                     </CoreTypography>
                 </form>
-
                 <Container className={styles.donateWrapper}>
                     <CoreTypography variant="h4">Can&apos;t volunteer?</CoreTypography>
                     <Button variant="contained" className={styles.donateButton}>
@@ -182,15 +178,10 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingLeft: "0",
             paddingRight: "0",
             flexDirection: "column",
-            //[theme.breakpoints.between(0, "sm")]: {
-            //    flexDirection: "column",
-            //    width: "375px",
-            //},
+            width: "375px",
         },
-
         textWrapper: {
             paddingBottom: "20px",
-
             [theme.breakpoints.between(0, "sm")]: {
                 paddingBottom: "35px",
             },
@@ -200,13 +191,11 @@ const useStyles = makeStyles((theme: Theme) =>
             display: "flex",
             flexDirection: "column",
         },
-
         nameInputContainer: {
             padding: "0",
             position: "relative",
             display: "inherit",
         },
-
         firstNameInput: {
             height: "40px",
             fontSize: "20px",
@@ -215,13 +204,11 @@ const useStyles = makeStyles((theme: Theme) =>
             textIndent: "10px",
             marginTop: "15px",
             width: "50%",
-
             "&:focus": {
                 outline: "none",
                 borderColor: colors.blue,
             },
         },
-
         lastNameInput: {
             height: "40px",
             fontSize: "20px",
@@ -234,12 +221,10 @@ const useStyles = makeStyles((theme: Theme) =>
                 borderColor: colors.blue,
             },
         },
-
         otherInput: {
             height: "40px",
             fontSize: "20px",
             marginRight: "20px",
-
             borderStyle: "solid",
             textIndent: "10px",
             marginTop: "30px",
@@ -249,7 +234,6 @@ const useStyles = makeStyles((theme: Theme) =>
                 borderColor: colors.blue,
             },
         },
-
         waiverLinkWrapper: {
             display: "flex",
             alignItems: "center",
@@ -294,7 +278,6 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingLeft: "0px",
             paddingRight: "0px",
         },
-
         donateButton: {
             marginTop: "15px",
             width: "100%",
