@@ -44,7 +44,6 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
             phone: phoneNumber,
         };
 
-        console.log(JSON.stringify({ volunteer, groupCount }));
         const r = await fetch(urls.api.signup(id), {
             method: "POST",
             body: JSON.stringify({ volunteer, groupCount }),
