@@ -37,38 +37,29 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
         e.preventDefault();
         setLoading(true);
 
-        // if field is empty, set groupCount to 1
-        setGroupCount(groupCount ? groupCount : 1);
+        // creates Volunteer object
+        const volunteer: Volunteer = {
+            name: firstName.current!.value + " " + lastName.current!.value,
+            email: email.current!.value,
+            phone: phoneNumber,
+        };
 
-        if (groupCount + volunteerCount > maxVolunteers || groupCount < 1) {
-            setError("Group size must be between 1 and " + `${maxVolunteers - volunteerCount}` + ".");
-            setLoading(false);
-        } else {
-            setError("");
-            // creates Volunteer object
-            const volunteer: Volunteer = {
-                name: firstName.current!.value + " " + lastName.current!.value,
-                email: email.current!.value,
-                phone: phoneNumber,
-            };
+        const r = await fetch(urls.api.signup(id), {
+            method: "POST",
+            body: JSON.stringify(volunteer),
+        });
+        const response = (await r.json()) as ApiResponse;
+        setLoading(false);
 
-            const r = await fetch(urls.api.signup(id), {
-                method: "POST",
-                body: JSON.stringify(volunteer),
-            });
-            const response = (await r.json()) as ApiResponse;
-            setLoading(false);
-
-            // error check response
-            if (response) {
-                if (response.success) {
-                    await router.push("/");
-                } else {
-                    setError(response?.message || errors.GENERIC_ERROR);
-                }
+        // error check response
+        if (response) {
+            if (response.success) {
+                await router.push("/");
             } else {
-                setError(errors.GENERIC_ERROR);
+                setError(response?.message || errors.GENERIC_ERROR);
             }
+        } else {
+            setError(errors.GENERIC_ERROR);
         }
     };
 
