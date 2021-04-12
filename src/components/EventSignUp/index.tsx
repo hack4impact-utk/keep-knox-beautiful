@@ -46,8 +46,9 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
 
         const r = await fetch(urls.api.signup(id), {
             method: "POST",
-            body: JSON.stringify(volunteer),
+            body: JSON.stringify({ volunteer, groupCount }),
         });
+
         const response = (await r.json()) as ApiResponse;
         setLoading(false);
 
@@ -64,7 +65,8 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
     };
 
     const handleGroupCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setGroupCount(parseInt(e.target?.value));
+        // sets groupCount to 1 if field is cleared
+        setGroupCount(parseInt(e.target?.value) || 1);
     };
 
     const handleInputMaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
