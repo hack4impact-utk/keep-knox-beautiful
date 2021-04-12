@@ -17,17 +17,15 @@ import { Volunteer, ApiResponse } from "utils/types";
 interface Props {
     id: string;
     groupSignUp: boolean;
-    volunteerCount: number;
-    maxVolunteers: number;
 }
 
-const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolunteers }) => {
+const EventSignUp: React.FC<Props> = ({ id, groupSignUp }) => {
     const styles = useStyles();
     const router = useRouter();
     const firstName = useRef<HTMLInputElement>(null);
     const lastName = useRef<HTMLInputElement>(null);
     const email = useRef<HTMLInputElement>(null);
-    const [groupCount, setGroupCount] = useState(1);
+    const [count, setCount] = useState(1);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState("");
@@ -38,7 +36,7 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
         setLoading(true);
 
         // creates Volunteer object
-        const volunteer: Volunteer = {
+        const vol: Volunteer = {
             name: firstName.current!.value + " " + lastName.current!.value,
             email: email.current!.value,
             phone: phoneNumber,
@@ -46,7 +44,7 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
 
         const r = await fetch(urls.api.signup(id), {
             method: "POST",
-            body: JSON.stringify({ volunteer, groupCount }),
+            body: JSON.stringify({ vol, count }),
         });
 
         const response = (await r.json()) as ApiResponse;
@@ -64,9 +62,9 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
         }
     };
 
-    const handleGroupCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // sets groupCount to 1 if field is cleared
-        setGroupCount(parseInt(e.target?.value) || 1);
+    const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // sets count to 1 if field is cleared
+        setCount(parseInt(e.target?.value) || 1);
     };
 
     const handleInputMaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,11 +78,11 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp, volunteerCount, maxVolu
             return (
                 <input
                     type="number"
-                    name="groupCount"
-                    onChange={handleGroupCountChange}
+                    name="count"
+                    onChange={handleCountChange}
                     placeholder="Group Count (Optional)"
                     className={styles.otherInput}
-                    id="groupCountField"
+                    id="countField"
                 />
             );
         }
