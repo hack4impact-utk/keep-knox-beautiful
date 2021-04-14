@@ -28,7 +28,6 @@ export interface Event {
     image?: ContentfulImage;
     registeredVolunteers?: (string | Volunteer)[]; // objectid ref is a string
     attendedVolunteers?: (string | Volunteer)[];
-    groupSignUp?: boolean;
 }
 
 export interface PaginatedVolunteers {
