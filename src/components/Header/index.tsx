@@ -5,6 +5,24 @@ import constants from "utils/constants";
 import AdminContent from "./admin_content";
 import { Toolbar } from "@material-ui/core";
 
+const Header: React.FC = () => {
+    const styles = useStyles();
+
+    return (
+        <React.Fragment>
+            <Container maxWidth="xl" className={styles.container}>
+                <a href="/">
+                    <img
+                        src={`/${constants.org.images.banner}`}
+                        className={styles.headerBanner}
+                        alt={`${constants.org.name.short} banner`}
+                    ></img>
+                </a>
+            </Container>
+        </React.Fragment>
+    );
+};
+
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         container: {
@@ -25,30 +43,5 @@ const useStyles = makeStyles((theme: Theme) =>
         },
     })
 );
-
-// update to use material-ui header?
-const Header: React.FC = () => {
-    const styles = useStyles();
-
-    return (
-        <React.Fragment>
-            <Container maxWidth="xl" className={styles.container}>
-                <img
-                    src={`/${constants.org.images.banner}`}
-                    className={styles.headerBanner}
-                    alt={`${constants.org.name.short} banner`}
-                ></img>
-                {
-                    // TODO: change to check for login
-                    true && (
-                        <Toolbar className={styles.adminContent}>
-                            <AdminContent />
-                        </Toolbar>
-                    )
-                }
-            </Container>
-        </React.Fragment>
-    );
-};
 
 export default Header;

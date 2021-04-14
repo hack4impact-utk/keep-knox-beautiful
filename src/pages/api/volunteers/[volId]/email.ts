@@ -1,23 +1,21 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getVolunteerEvents } from "server/actions/Volunteer";
+import { sendVerificationEmail } from "server/actions/Volunteer";
 import errors from "utils/errors";
-import { Event, APIError } from "utils/types";
+import { Volunteer, APIError } from "utils/types";
 
-// @route   /api/volunteers/[volId]/events - Returns a list of paginated
-// events that a single volunteer attended
+// @route   PUT /api/volunteers/[volId]/email - Emails a single volunteer their attendance information.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        if (req.method == "GET") {
-            if (!req || !req.query || !req.query.volId || !req.query.page) {
-                throw new Error("Need a volunteer id and a page number for this route.");
+        if (req.method === "PUT") {
+            if (!req || !req.query || !req.query.volId) {
+                throw new Error("Need a volunteer id for this route.");
             }
-            const volId = req.query.volId as string;
-            const page = Number(req.query.page);
 
-            const events: Event[] = await getVolunteerEvents(volId, page);
+            const id = req.query.volId as string;
+            await sendVerificationEmail(id);
             res.status(200).json({
                 success: true,
-                payload: events,
+                payload: {},
             });
         }
     } catch (error) {
