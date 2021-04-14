@@ -39,7 +39,7 @@ const Header: React.FC = () => {
                     alt={`${constants.org.name.short} banner`}
                 ></img>
                 {
-                    // change to check for login
+                    // TODO: change to check for login
                     true && (
                         <Toolbar className={styles.adminContent}>
                             <AdminContent />
