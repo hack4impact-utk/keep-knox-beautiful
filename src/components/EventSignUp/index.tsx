@@ -25,7 +25,7 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp }) => {
     const firstName = useRef<HTMLInputElement>(null);
     const lastName = useRef<HTMLInputElement>(null);
     const email = useRef<HTMLInputElement>(null);
-    const [count, setCount] = useState(1);
+    const [groupCount, setGroupCount] = useState(1);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState("");
@@ -36,15 +36,15 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp }) => {
         setLoading(true);
 
         // creates Volunteer object
-        const vol: Volunteer = {
+        const volunteer: Volunteer = {
             name: firstName.current!.value + " " + lastName.current!.value,
             email: email.current!.value,
             phone: phoneNumber,
         };
 
-        const r = await fetch(urls.api.signup(id), {
+        const r = await fetch(urls.api.signup(id) + "?count=" + `${groupCount}`, {
             method: "POST",
-            body: JSON.stringify({ vol, count }),
+            body: JSON.stringify(volunteer),
         });
 
         const response = (await r.json()) as ApiResponse;
@@ -62,9 +62,9 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp }) => {
         }
     };
 
-    const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleGroupCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // sets count to 1 if field is cleared
-        setCount(parseInt(e.target?.value) || 1);
+        setGroupCount(parseInt(e.target?.value) || 1);
     };
 
     const handleInputMaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,11 +78,11 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp }) => {
             return (
                 <input
                     type="number"
-                    name="count"
-                    onChange={handleCountChange}
+                    name="groupCount"
+                    onChange={handleGroupCountChange}
                     placeholder="Group Count (Optional)"
                     className={styles.otherInput}
-                    id="countField"
+                    id="groupCountField"
                 />
             );
         }
