@@ -13,6 +13,7 @@ import ScheduleIcon from "@material-ui/icons/Schedule";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import { isSameDay, format } from "date-fns";
 import EventSignUp from "src/components/EventSignUp";
+import theme from "utils/theme";
 
 interface Props {
     event: Event;
@@ -24,6 +25,31 @@ const EventPage: NextPage<Props> = ({ event }) => {
     if (!event) {
         return <Error statusCode={404} />;
     }
+
+    const noImage = () => {
+        if (event.image !== undefined) {
+            return <img src={event.image?.url} alt={`${event.name} img`} style={{ width: "90%" }} />;
+        } else {
+            return (
+                <Container
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        backgroundColor: theme.palette.secondary.main,
+                        width: "90%",
+                        height: "30%",
+                    }}
+                >
+                    <img
+                        src={`/${constants.org.images.logo}`}
+                        style={{ alignSelf: "center", width: "30%" }}
+                        alt={`${constants.org.name.short} logo`}
+                    />
+                </Container>
+            );
+        }
+    };
+
     event.startDate = new Date(event.startDate as Date);
     event.endDate = new Date(event.endDate as Date);
 
@@ -100,7 +126,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
             </Container>
             <Container className={styles.contentContainer}>
                 <Container className={styles.leftWrapper}>
-                    <img src={event.image?.url} alt={`${event.name} img`} style={{ width: "90%" }} />
+                    {noImage()}
                     <Container maxWidth="xl" className={styles.caption}>
                         <Container maxWidth="sm">
                             <CoreTypography variant="h4"> {event.caption} </CoreTypography>
