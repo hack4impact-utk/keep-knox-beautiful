@@ -159,9 +159,16 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp }) => {
                 </form>
                 <Container className={styles.donateWrapper}>
                     <CoreTypography variant="h4">Can&apos;t volunteer?</CoreTypography>
-                    <Button variant="contained" className={styles.donateButton}>
-                        <CoreTypography variant="button">Donate</CoreTypography>
-                    </Button>
+                    <a
+                        href="http://www.keepknoxvillebeautiful.org/donate"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ textDecoration: "none" }}
+                    >
+                        <Button variant="contained" className={styles.donateButton}>
+                            <CoreTypography variant="button">Donate</CoreTypography>
+                        </Button>
+                    </a>
                 </Container>
             </Container>
         </>
