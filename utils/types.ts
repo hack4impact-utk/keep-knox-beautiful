@@ -5,7 +5,6 @@ export interface Volunteer {
     email?: string;
     name: string;
     phone?: string;
-    // filledForm?: boolean;
     totalEvents?: number; // num attended events
     totalHours?: number; // aggregate of attended event hours
     registeredEvents?: (string | Event)[]; // objectid ref is a string
@@ -13,7 +12,6 @@ export interface Volunteer {
 }
 
 export interface Event {
-    groupSignUp: boolean;
     _id?: string;
     name: string;
     description?: string;
@@ -21,6 +19,7 @@ export interface Event {
     maxVolunteers?: number;
     volunteerCount?: number; // registered + attended
     location?: string;
+    groupSignUp?: boolean;
     startDate?: Date;
     endDate?: Date;
     startRegistration?: Date;
@@ -34,6 +33,10 @@ export interface Event {
 export interface PaginatedVolunteers {
     volunteers: Volunteer[];
     registeredCount: number;
+}
+export interface LoadMorePaginatedData {
+    data: (Event | Volunteer)[];
+    isLastPage: boolean;
 }
 
 export interface ContentfulImage {

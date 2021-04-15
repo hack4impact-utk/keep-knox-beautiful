@@ -5,7 +5,7 @@ import { Event, Volunteer, APIError } from "utils/types";
 import { escapeRegExp } from "utils/util";
 import { createTransport } from "nodemailer";
 import constants from "utils/constants";
-import { format } from "date-fns";
+import { format, isAfter, isBefore } from "date-fns";
 
 // only return these fields from mongodb
 const VOL_FIELDS = {
@@ -74,6 +74,23 @@ export const addVolunteer = async function (vol: Volunteer) {
 };
 
 /**
+ * Updates a volunteer that already exists in database.
+ * @param id The _id of the volunteer we want to update.
+ * @param vol The new volunteer object to insert into database.
+ */
+export const updateVolunteer = async function (id: string, vol: Volunteer) {
+    await mongoDB();
+    if (!id || !vol) {
+        throw new APIError(400, "Invalid previous volunteer or invalid new volunteer.");
+    }
+
+    const model = await VolunteerSchema.findByIdAndUpdate(id, vol);
+    if (!model) {
+        throw new APIError(404, "Volunteer not found.");
+    }
+};
+
+/**
  * @param ids An array of volunteer objectIds whose hours need to be updated.
  * @param change The change that needs to be applied to each volunteer's hours. Can be negative.
  */
@@ -88,19 +105,29 @@ export const updateVolunteerHours = async function (ids: string[], change: numbe
  * events list. If the volunteer does not exist, it will create one first.
  * @param vol The volunteer data to register.
  * @param eventId The event id to register the volunter for.
+ * @param registerCount The number of people registering for event eventId. Only allowed for group events.
  */
-export const registerVolunteerToEvent = async function (vol: Volunteer, eventId: string) {
+export const registerVolunteerToEvent = async function (vol: Volunteer, eventId: string, registerCount = 1) {
     await mongoDB();
     if (!vol || !eventId) {
         throw new APIError(400, "Invalid input. Need both volunteer and event information.");
+    } else if (isNaN(registerCount) || registerCount < 1) {
+        throw new APIError(400, "Invalid registration count.");
     }
 
     const event = await EventSchema.findById(eventId);
     if (!event) {
         throw new APIError(404, "Event does not exist.");
-    }
-    if (event.maxVolunteers && event.volunteerCount! >= event.maxVolunteers) {
+    } else if (isBefore(Date.now(), event.startRegistration as Date)) {
+        throw new APIError(404, "Registration for this event hasn't opened yet.");
+    } else if (isAfter(Date.now(), event.endRegistration as Date)) {
+        throw new APIError(404, "Registration for this event has closed.");
+    } else if (event.maxVolunteers && event.volunteerCount! >= event.maxVolunteers) {
         throw new APIError(404, "Event is at max volunteers.");
+    } else if (event.maxVolunteers && event.volunteerCount! + registerCount > event.maxVolunteers) {
+        throw new APIError(404, "Count is greater than the number of volunteer spots remaining.");
+    } else if (!event.groupSignUp && registerCount > 1) {
+        throw new APIError(404, "Group registration is not allowed for this event.");
     }
 
     // if !exists, create volunteer. Note that this might update the
@@ -108,12 +135,12 @@ export const registerVolunteerToEvent = async function (vol: Volunteer, eventId:
     // VolunteerSchema.
     const volunteer = await VolunteerSchema.findOneAndUpdate({ email: vol.email }, vol, { new: true, upsert: true });
     if (event.registeredVolunteers?.indexOf(volunteer._id) !== -1) {
-        throw new APIError(404, "The volunteer has already been registered to this event.");
+        throw new APIError(404, "You have already been registered to this event.");
     }
 
     volunteer.registeredEvents?.push(eventId);
     event.registeredVolunteers?.push(volunteer._id);
-    event.volunteerCount! += 1; // default to 0 so will never be undefined
+    event.volunteerCount! += registerCount; // default to 0 so will never be undefined
     // these are not atomic updates
     const volPromise = VolunteerSchema.updateOne({ email: vol.email }, volunteer);
     const eventPromise = EventSchema.updateOne({ _id: eventId }, event);
@@ -252,7 +279,7 @@ export const getVolunteerEvents = async function (volId: string, page: number) {
         throw new APIError(404, "Volunteer not found.");
     }
     return (volunteer.attendedEvents as unknown) as Event[];
-}
+};
 
 /*
  * Sends an email to the volunteer. The email contains
@@ -302,7 +329,7 @@ export const sendVerificationEmail = async function (volId: string) {
 };
 
 /**
- * Internally used function that returns the email body that contains a volunteer's 
+ * Internally used function that returns the email body that contains a volunteer's
  * attended event information.
  * @param volunteer The populated volunteer object whose data will be used to
  * constuct the email.

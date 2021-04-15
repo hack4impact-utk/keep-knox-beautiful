@@ -99,7 +99,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
                         <hr style={{ width: "100%", height: "3px", backgroundColor: colors.grays[80] }} />
                     </Container>
                     <Container maxWidth="xl" className={styles.signUpForm}>
-                        <EventSignUp id={event._id as string} groupSignUp={event.groupSignUp} />
+                        <EventSignUp id={event._id as string} groupSignUp={event.groupSignUp as boolean} />
                     </Container>
                 </Container>
             );

@@ -3,7 +3,7 @@ import errors from "utils/errors";
 import formidable, { File } from "formidable";
 import { Event, APIError } from "utils/types";
 import constants from "utils/constants";
-import { addEvent, getEvents } from "server/actions/Event";
+import { addEvent, getCurrentEvents, getPastEventsAdmin } from "server/actions/Event";
 import { uploadImage } from "server/actions/Contentful";
 
 // formidable config
@@ -13,17 +13,36 @@ export const config = {
     },
 };
 
-// @route   GET /api/events - Return a list of paginated events. - Public
+// @route   GET /api/events - For pagianted queries, return a LoadMorePagination
+//   type that contains a list of events and whether its the last page. Returns an
+//   array of events for all unpaginated queries. Use `type` param to declare
+//   what type of events to return. - Public
 // @route   POST /api/events - Create an event from form data. - Private
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         if (req.method === "GET") {
-            const events: Event[] = await getEvents();
+            const type = req.query.type;
+            const page = req.query.page ? Number(req.query.page) : 1;
+            const search = req.query.search ? new Date(req.query.search as string) : undefined;
 
-            res.status(200).json({
-                success: true,
-                payload: { events },
-            });
+            if (type == "current") {
+                // shouldn't use this API route in prod since the events are pre-fetched
+                //   with getServerSideProps and displayed statically on page
+                const events = await getCurrentEvents();
+                res.status(200).json({
+                    success: true,
+                    payload: events,
+                });
+            } else if (type == "past") {
+                // will be used since we paginate admin's page events
+                const loadMorePaginatedEvents = await getPastEventsAdmin(page, search);
+                res.status(200).json({
+                    success: true,
+                    payload: loadMorePaginatedEvents,
+                });
+            } else {
+                throw new APIError(400, "Invalid query parameter `type`.");
+            }
         } else if (req.method === "POST") {
             const form = new formidable.IncomingForm();
             form.parse(req, async (err: string, fields: formidable.Fields, files: formidable.Files) => {
@@ -34,7 +53,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     // fields are strings so convert the numbers
                     event.hours = Number(event?.hours);
-                    event.maxVolunteers = Number(event?.maxVolunteers);
+                    event.maxVolunteers = event?.maxVolunteers ? Number(event?.maxVolunteers) : undefined;
+                    event.groupSignUp = fields["groupSignUp"] === "true";
 
                     if (file) {
                         if (file?.size > constants.contentfulImageLimit) {

@@ -5,6 +5,7 @@ import {
     markVolunteerNotPresent,
     markVolunteerPresent,
     registerVolunteerToEvent,
+    updateVolunteer,
     getVolunteerEvents,
 } from "server/actions/Volunteer";
 import VolunteerSchema from "server/models/Volunteer";
@@ -12,6 +13,9 @@ import EventSchema from "server/models/Event";
 import { Volunteer, Event } from "utils/types";
 
 jest.mock("server");
+
+// linter complains about any mock object type
+/* eslint-disable */
 
 describe("getVolunteer() tests", () => {
     test("valid volunteer", async () => {
@@ -54,7 +58,6 @@ describe("getVolunteers() tests", () => {
         const expectedFilter = { name: { $regex: `.*${search}.*`, $options: "i" } };
         const expectedProjection = { name: 1, email: 1, _id: 1 };
 
-        /* eslint-disable */
         // the return value of each chained call is this VolsMock object.
         // then the next call in the chain will call these functions again
         const VolsMock: any = {
@@ -70,7 +73,6 @@ describe("getVolunteers() tests", () => {
         expect(VolunteerSchema.find).toHaveBeenLastCalledWith(expectedFilter, expectedProjection);
         expect(VolsMock.skip).toHaveBeenLastCalledWith((page-1) * VOLS_PER_PAGE);
         expect(VolsMock.limit).toHaveBeenLastCalledWith(VOLS_PER_PAGE);
-        /* eslint-enable */
     });
 
     test("negative page number", async () => {
@@ -101,6 +103,37 @@ describe("addVolunteer() tests", () => {
         await addVolunteer(mockVol);
         expect(VolunteerSchema.create).lastCalledWith(mockVol);
         expect(VolunteerSchema.create).toHaveBeenCalledTimes(1);
+    });
+});
+
+// Begin updateVolunteer test cases
+describe("updateVolunteer() tests", () => {
+    test("invalid parameters", async () => {
+        expect.assertions(1);
+        await expect(updateVolunteer("", { name: "volunteer name" })).rejects.toThrowError(
+            "Invalid previous volunteer or invalid new volunteer."
+        );
+    });
+
+    test("existing volunteer not found", async () => {
+        const mockVol = {
+            name: "volunteer name",
+        };
+        const mockId = "6061e27251c1c60dffeac829";
+        expect.assertions(1);
+        VolunteerSchema.findByIdAndUpdate = jest.fn().mockImplementation(async (vol: Volunteer) => undefined);
+        await expect(updateVolunteer(mockId, mockVol)).rejects.toThrowError("Volunteer not found.");
+    });
+
+    test("volunteer successfully updated", async () => {
+        const mockVol = {
+            name: "volunteer name",
+        };
+        const mockId = "6061e27251c1c60dffeac829";
+        VolunteerSchema.findByIdAndUpdate = jest.fn().mockImplementation(async (vol: Volunteer) => vol);
+        await updateVolunteer(mockId, mockVol);
+        expect(VolunteerSchema.findByIdAndUpdate).lastCalledWith(mockId, mockVol);
+        expect(VolunteerSchema.findByIdAndUpdate).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -610,10 +643,8 @@ describe("getVolunteerEvents() tests", () => {
             },
         ];
 
-        /* eslint-disable */
         const VolsMock: any = {
             getVolunteerEvents, // to be tested,
-            // findById: jest.fn(() => VolsMock),
             populate: jest.fn(() => []),
         };
         VolunteerSchema.findById = jest.fn(() => VolsMock);
@@ -634,7 +665,6 @@ describe("getVolunteerEvents() tests", () => {
                 limit: EVENTS_PER_PAGE,
             },
         });
-        /* eslint-enable */
     });
 
     test("invalid page number", async () => {
@@ -646,21 +676,15 @@ describe("getVolunteerEvents() tests", () => {
     test("no volunteer with that id", async () => {
         expect.assertions(1);
         const mockEvents = undefined;
+        const page = 2;
 
-        /* eslint-disable */
         const VolsMock: any = {
             getVolunteerEvents, // to be tested,
-            // findById: jest.fn(() => VolsMock),
             populate: jest.fn(() => []),
         };
         VolunteerSchema.findById = jest.fn(() => VolsMock);
         VolsMock.populate.mockImplementation(() => mockEvents); // mock final return val
 
-        const EVENTS_PER_PAGE = 3;
-        const page = 2;
-        const EVENT_FIELDS = { _id: 1, name: 1, startDate: 1, hours: 1 };
-
         await expect(VolsMock.getVolunteerEvents(volId, page)).rejects.toThrowError("Volunteer not found.");
-        /* eslint-enable */
     });
 });
