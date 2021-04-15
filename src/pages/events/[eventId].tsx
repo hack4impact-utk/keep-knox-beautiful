@@ -100,8 +100,8 @@ const EventPage: NextPage<Props> = ({ event }) => {
             </Container>
             <Container className={styles.contentContainer}>
                 <Container className={styles.leftWrapper}>
-                    <img src={event.image?.url} alt={`${event.name} img`} style={{ width: 400 }} />
-                    <Container maxWidth="xl" className={`${styles.eventName} ${styles.caption}`}>
+                    <img src={event.image?.url} alt={`${event.name} img`} style={{ width: "90%" }} />
+                    <Container maxWidth="xl" className={styles.caption}>
                         <Container maxWidth="sm">
                             <CoreTypography variant="h4"> {event.caption} </CoreTypography>
                         </Container>
@@ -202,14 +202,17 @@ const useStyles = makeStyles((theme: Theme) =>
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            maxWidth: "500px",
+            textAlignLast: "center",
         },
         caption: {
             marginTop: "50px",
-            marginBottom: "50px",
+            marginBottom: "25px",
+            textAlign: "justify",
         },
         contentContainer: {
             display: "flex",
-            paddingTop: "100px",
+            paddingTop: "80px",
             paddingBottom: "100px",
             [theme.breakpoints.between(0, "sm")]: {
                 flexDirection: "column",
@@ -219,6 +222,7 @@ const useStyles = makeStyles((theme: Theme) =>
             display: "inherit",
             flexDirection: "column",
             alignItems: "center",
+            paddingRight: "0px",
         },
         rightWrapper: {
             display: "flex",
@@ -227,6 +231,7 @@ const useStyles = makeStyles((theme: Theme) =>
             textAlign: "center",
             maxWidth: "700px",
             minWidth: "400px",
+            padding: "0px",
         },
         cardContainer: {
             padding: "0",
