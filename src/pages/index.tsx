@@ -1,34 +1,21 @@
 import React from "react";
 import { GetStaticPropsContext, NextPage } from "next";
 import withWidth from "@material-ui/core/withWidth";
-
-import { Button, Container, createStyles, Grid, makeStyles, Theme } from "@material-ui/core";
+import { Button, Container, createStyles, Grid, makeStyles, Theme, Divider } from "@material-ui/core";
 import EventsContainer from "src/components/EventsContainer";
 import CoreTypography from "src/components/core/typography";
-
-import { getEvents } from "server/actions/Event";
+import { getCurrentEvents, getPastEvents } from "server/actions/Event";
 import constants from "utils/constants";
-
 import { Event } from "utils/types";
+import colors from "src/components/core/colors";
 
 interface Props {
-    events: Event[];
+    currentEvents: Event[];
+    pastEvents: Event[];
     width: string;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        jumbotron: {
-            width: "100%",
-            height: "65vh",
-            backgroundColor: theme.palette.primary.main,
-            position: "relative",
-            top: 0,
-        },
-    })
-);
-
-const Home: NextPage<Props> = ({ events, width }) => {
+const Home: NextPage<Props> = ({ currentEvents, pastEvents, width }) => {
     const classes = useStyles();
 
     return (
@@ -51,6 +38,7 @@ const Home: NextPage<Props> = ({ events, width }) => {
                             flexDirection: "column",
                             justifyContent: "center",
                             paddingLeft: "10%",
+                            marginTop: "20px",
                         }}
                     >
                         <CoreTypography variant="h1" style={{ color: "white" }}>
@@ -70,15 +58,25 @@ const Home: NextPage<Props> = ({ events, width }) => {
                             <img
                                 src={`/${constants.org.images.logo}`}
                                 alt={`${constants.org.name.short} logo`}
-                                style={{ width: 250 }}
+                                style={{ height: "200px" }}
                             />
                         </Grid>
                     )}
                 </Grid>
             </div>
             <Container disableGutters style={{ marginTop: "-20vh" }}>
-                <EventsContainer events={events} />
-                <Button>Load More</Button>
+                <EventsContainer events={currentEvents} />
+            </Container>
+
+            <Container disableGutters maxWidth="lg">
+                <Divider variant="middle" />
+                <CoreTypography variant="h2" style={{ textAlign: "center" }}>
+                    Recent Events
+                </CoreTypography>
+            </Container>
+
+            <Container disableGutters style={{ marginTop: "0vh", marginBottom: "100px" }}>
+                <EventsContainer events={pastEvents} />
             </Container>
         </div>
     );
@@ -86,10 +84,13 @@ const Home: NextPage<Props> = ({ events, width }) => {
 
 export async function getStaticProps(context: GetStaticPropsContext) {
     try {
-        const events: Event[] = await getEvents();
+        const currentEvents: Event[] = await getCurrentEvents();
+        const pastEvents: Event[] = await getPastEvents();
+
         return {
             props: {
-                events: JSON.parse(JSON.stringify(events)) as Event[],
+                currentEvents: JSON.parse(JSON.stringify(currentEvents)) as Event[],
+                pastEvents: JSON.parse(JSON.stringify(pastEvents)) as Event[],
             },
             revalidate: constants.revalidate.upcomingEvents,
         };
@@ -103,5 +104,23 @@ export async function getStaticProps(context: GetStaticPropsContext) {
         };
     }
 }
+
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        jumbotron: {
+            width: "100%",
+            height: "55vh",
+            backgroundColor: theme.palette.primary.main,
+            position: "relative",
+            top: 0,
+        },
+        "@global": {
+            ".MuiDivider-middle": {
+                borderTop: `2px solid ${colors.gray}`,
+                margin: "100px 50px 0px 50px",
+            },
+        },
+    })
+);
 
 export default withWidth()(Home);

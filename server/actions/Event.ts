@@ -2,8 +2,9 @@ import mongoDB from "../index";
 import EventSchema from "../models/Event";
 import VolunteerSchema from "../models/Volunteer";
 import { Types } from "mongoose";
-import { Event, APIError, Volunteer, PaginatedVolunteers } from "utils/types";
+import { Event, APIError, Volunteer, PaginatedVolunteers, LoadMorePaginatedData } from "utils/types";
 import { escapeRegExp } from "utils/util";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 interface Config {
     VOLS_PER_PAGE: number;
@@ -32,7 +33,7 @@ export const getEvent = async function (id: string) {
         throw new APIError(400, "Invalid id");
     }
 
-    const event = await EventSchema.findById(id);
+    const event = await EventSchema.findById(id, { registeredVolunteers: 0, attendedVolunteers: 0 });
     if (!event) {
         throw new APIError(404, "Event does not exist");
     }
@@ -41,17 +42,124 @@ export const getEvent = async function (id: string) {
 };
 
 /**
- * @returns All events.
+ * Get all events that are open for registration - regardless
+ *   of whether the event is full or not.
+ * @returns All events that the user can register to.
  */
-export const getEvents = async function () {
+export const getCurrentEvents = async function () {
     await mongoDB();
 
-    const events = (await EventSchema.find({})) as Event[];
-    if (!events || !events.length) {
-        throw new APIError(404, "No events");
+    const EVENT_FIELDS = { name: 1, caption: 1, location: 1, startDate: 1, endDate: 1, image: 1 };
+    const now = new Date(Date.now());
+    const events = (await EventSchema.find(
+        {
+            startRegistration: {
+                $lte: now,
+            },
+            endRegistration: {
+                $gt: now,
+            },
+        },
+        EVENT_FIELDS
+    ).sort({ startDate: -1 })) as Event[];
+
+    if (!events) {
+        throw new APIError(404, "No events.");
     }
 
     return events;
+};
+
+/**
+ * Get the most recent events that the volunteer cannot register to.
+ * This function is used to show how active an org is – in case there
+ *   are no events that are open for registration.
+ * @returns The 3 most recent events whose registration closed.
+ */
+export const getPastEvents = async function () {
+    await mongoDB();
+
+    const PAST_EVENTS_LIMIT = 3;
+    const EVENT_FIELDS = { name: 1, caption: 1, location: 1, startDate: 1, endDate: 1, image: 1 };
+    const now = new Date(Date.now());
+    const events = (await EventSchema.find({ endRegistration: { $lt: now } }, EVENT_FIELDS)
+        .sort({ startDate: -1 })
+        .limit(PAST_EVENTS_LIMIT)) as Event[];
+
+    if (!events) {
+        throw new APIError(404, "No events.");
+    }
+
+    return events;
+};
+
+/**
+ * Get all events whose end dates haven't passed.
+ * @returns An array of events that haven't ended.
+ */
+export const getCurrentEventsAdmin = async function () {
+    await mongoDB();
+
+    const EVENT_FIELDS = { name: 1, caption: 1, location: 1, startDate: 1, endDate: 1, image: 1 };
+    const now = new Date(Date.now());
+    const events = (await EventSchema.find({ endDate: { $gt: now } }, EVENT_FIELDS).sort({ startDate: -1 })) as Event[];
+    if (!events) {
+        throw new APIError(404, "No events.");
+    }
+
+    return events;
+};
+
+/**
+ * Get a partition (page) of events that have already happened.
+ * @returns A paginated array of events.
+ */
+export const getPastEventsAdmin = async function (page: number, search?: Date) {
+    await mongoDB();
+
+    // error check page and set it to be offset from 0 (1st page will return the 0th offset of data)
+    if (isNaN(page) || page < 1) {
+        throw new APIError(400, "Invalid page number.");
+    }
+    page -= 1;
+
+    const EVENTS_PER_PAGE = 2;
+    const EVENT_FIELDS = { name: 1, caption: 1, location: 1, startDate: 1, endDate: 1, image: 1 };
+    const now = new Date(Date.now());
+    let events: Event[];
+
+    if (search) {
+        // search from the start of whatever year+month is given to the
+        //   end of the same year+month
+        const startSearchDate = startOfMonth(search);
+        const endSearchDate = endOfMonth(search);
+
+        events = await EventSchema.find(
+            {
+                endDate: { $lt: now },
+                startDate: { $gte: startSearchDate, $lte: endSearchDate },
+            },
+            EVENT_FIELDS
+        )
+            .sort({ startDate: -1 })
+            .skip(page * EVENTS_PER_PAGE)
+            .limit(EVENTS_PER_PAGE + 1);
+    } else {
+        events = await EventSchema.find({ endDate: { $lt: now } }, EVENT_FIELDS)
+            .sort({ startDate: -1 })
+            .skip(page * EVENTS_PER_PAGE)
+            .limit(EVENTS_PER_PAGE + 1);
+    }
+    // +1 in limit() to see if this is the last page
+
+    if (!events) {
+        throw new APIError(500, "Error fetching events.");
+    }
+
+    return {
+        data: events.slice(0, EVENTS_PER_PAGE),
+        isLastPage: events.length < EVENTS_PER_PAGE + 1,
+    } as LoadMorePaginatedData;
 };
 
 /**
@@ -121,8 +229,12 @@ export const getEventVolunteers = async function (eventId: string, page: number,
         SORT_COND: SORT_COND,
     };
 
+    if (!eventId) {
+        throw new APIError(400, "Invalid event id.");
+    }
+
     // error check page and set it to be offset from 0 (1st page will return the 0th offset of data)
-    if (page < 1) {
+    if (isNaN(page) || page < 1) {
         throw new APIError(400, "Invalid page number");
     }
     page -= 1;
@@ -235,7 +347,6 @@ export const getEventVolunteers = async function (eventId: string, page: number,
                 skip: page * VOLS_PER_PAGE,
                 limit: VOLS_PER_PAGE,
             };
-            console.log(query);
             const event = await getEventVolsQuery(query, config);
 
             volunteers = event?.registeredVolunteers as Volunteer[];

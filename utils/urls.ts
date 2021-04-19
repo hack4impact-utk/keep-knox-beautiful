@@ -8,11 +8,13 @@ export default {
         event: (eventId: string) => `/events/${eventId}`,
         login: "/login",
         adminHome: "/admin",
+        events: "/admin/events",
         addEvent: "/admin/events/new",
         updateEvent: (eventId: string) => `/admin/events/${eventId}/update`,
         manageEvent: (eventId: string) => `/admin/events/${eventId}`,
         volunteers: "/admin/volunteers",
         volunteer: (volId: string) => `/admin/volunteers/${volId}`,
+        updateVolunteer: (volId: string) => `/admin/volunteers/${volId}/update`,
     },
     api: {
         events: "/api/events",
@@ -23,5 +25,6 @@ export default {
         markNotPresent: (eventId: string, volId: string) => `/api/events/${eventId}/notPresent/${volId}`,
         volunteers: "/api/volunteers",
         volunteer: (volId: string) => `/api/volunteers/${volId}`,
+        sendVerificationEmail: (volId: string) => `/api/volunteers/${volId}/email`,
     },
 };

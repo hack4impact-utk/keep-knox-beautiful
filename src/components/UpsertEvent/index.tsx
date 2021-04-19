@@ -19,6 +19,9 @@ import Container from "@material-ui/core/Container";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Button from "@material-ui/core/Button";
+import Tooltip from "@material-ui/core/Tooltip";
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { DateTimePicker } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
@@ -27,6 +30,7 @@ import PublishIcon from "@material-ui/icons/Publish";
 import DescriptionIcon from "@material-ui/icons/Description";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import SubjectIcon from "@material-ui/icons/Subject";
+import InfoIcon from "@material-ui/icons/Info";
 
 interface IFormValues {
     name?: string;
@@ -36,11 +40,12 @@ interface IFormValues {
     endRegistration?: MaterialUiPickersDate | undefined;
     hours?: number;
     maxVolunteers?: number;
+    groupSignUp?: boolean;
     location?: string;
     description?: string;
     caption?: string;
     image?: File | null;
-    [key: string]: MaterialUiPickersDate | string | number | File | undefined | null;
+    [key: string]: MaterialUiPickersDate | string | number | File | boolean | undefined | null;
 }
 
 interface IErrors {
@@ -66,6 +71,7 @@ const UpsertEvent: React.FC<Props> = ({ existingEvent }) => {
         name: existingEvent?.name,
         hours: existingEvent?.hours,
         maxVolunteers: existingEvent?.maxVolunteers,
+        groupSignUp: existingEvent?.groupSignUp || false,
         location: existingEvent?.location,
         description: existingEvent?.description,
         caption: existingEvent?.caption,
@@ -99,6 +105,11 @@ const UpsertEvent: React.FC<Props> = ({ existingEvent }) => {
         setValues(values => ({ ...values, [event.target.id]: event.target.value }));
     };
 
+    // boolean state changes
+    const handleBoolChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValues(values => ({ ...values, [event.target.id]: event.target.checked }));
+    };
+
     // handle form submission, essentially just creating formdata to send
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -123,6 +134,8 @@ const UpsertEvent: React.FC<Props> = ({ existingEvent }) => {
             if (typeof values[key] === "string") {
                 fd.append(key, values[key] as string);
             } else if (typeof values[key] === "number") {
+                fd.append(key, values[key]?.toString() as string);
+            } else if (typeof values[key] === "boolean") {
                 fd.append(key, values[key]?.toString() as string);
             } else if (values[key] instanceof Date) {
                 fd.append(key, new Date(values[key] as Date).toUTCString());
@@ -311,6 +324,7 @@ const UpsertEvent: React.FC<Props> = ({ existingEvent }) => {
                                 label="Event Duration"
                                 type="number"
                                 value={values.hours}
+                                helperText="Total duration in hours."
                                 required
                                 rowsMax={4}
                                 color="secondary"
@@ -321,9 +335,24 @@ const UpsertEvent: React.FC<Props> = ({ existingEvent }) => {
                                 label="Max Volunteers"
                                 type="number"
                                 value={values.maxVolunteers}
+                                helperText="Value of 0 will hide signup form."
                                 rowsMax={4}
                                 color="secondary"
                                 onChange={handleTextChange}
+                            />
+                        </div>
+
+                        <div style={{ margin: "0px 15px" }}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        id="groupSignUp"
+                                        checked={values.groupSignUp}
+                                        onChange={handleBoolChange}
+                                        color="secondary"
+                                    />
+                                }
+                                label="Allow group sign ups?"
                             />
                         </div>
 
@@ -340,6 +369,16 @@ const UpsertEvent: React.FC<Props> = ({ existingEvent }) => {
                                 color="secondary"
                                 onChange={handleTextChange}
                             />
+                        </div>
+                        <div style={{ margin: "10px 0px -10px 10px" }}>
+                            <Tooltip
+                                enterTouchDelay={0}
+                                leaveTouchDelay={5000}
+                                title="Be careful when pasting formatted text. It's recommended to 
+                            clean the formatting (on the very right) and reformat it in the editor."
+                            >
+                                <InfoIcon />
+                            </Tooltip>
                         </div>
                         <div className={styles.align}>
                             <DescriptionIcon style={{ fontSize: "40px", marginTop: "15px" }} />
