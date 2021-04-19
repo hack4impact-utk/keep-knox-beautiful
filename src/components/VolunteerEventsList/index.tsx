@@ -3,6 +3,7 @@ import { Event, Volunteer } from "utils/types";
 import CoreTypography from "src/components/core/typography/CoreTypography";
 import colors from "src/components/core/colors";
 import { createStyles, makeStyles, Theme, withStyles } from "@material-ui/core/styles";
+import { GetStaticPropsContext, NextPage } from "next";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -12,22 +13,32 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import SortIcon from "@material-ui/icons/Sort";
 import Pagination from "@material-ui/lab/Pagination";
+import urls from "utils/urls";
+
+interface Props {
+    volId: string;
+    attendedEvents: Event[];
+}
 
 // create attended events table for current volunteer
-export default function VolunteerEventsList(props: Volunteer) {
+const VolunteerEventsList: NextPage<Props> = ({ volId, attendedEvents }) => {
     const classes = useStyles();
-    const eventsPerPage = 5;
-    const [page, setPage] = useState(1);
+    const eventsPerPage = 6;
+    const [page, setPage] = useState<number>(1);
+    const [attendedEventsState, setAttendedEvents] = useState<Event[]>(attendedEvents);
 
-    const handleChange = (event: React.ChangeEvent<unknown>, newPage: number) => {
+    const pageChangeHandler = async (event: React.ChangeEvent<unknown>, newPage: number) => {
         setPage(newPage);
+        const response = await fetch(`${urls.api.volunteers}/${volId}/events/?page=${page}`, { method: "GET" });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const newAttendedEvents: Event[] = (await response.json()).payload as Event[];
+        setAttendedEvents(newAttendedEvents);
     };
 
     // Uncomment to use actual volunteer data for volId from server
     // const rows: Array<Event> = props.attendedEvents ? props.attendedEvents : [];
 
-    const numPages = rows.length > 0 ? Math.ceil(rows.length / eventsPerPage) : 0;
-    const emptyRows = numPages > 0 ? numPages * eventsPerPage - rows.length : eventsPerPage;
+    const emptyRows = attendedEventsState ? eventsPerPage - attendedEventsState.length : eventsPerPage;
 
     return (
         <TableContainer component={Paper} className={classes.tableContainer}>
@@ -52,35 +63,31 @@ export default function VolunteerEventsList(props: Volunteer) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {rows.length > 0 &&
-                        (numPages > 0
-                            ? rows.slice((page - 1) * eventsPerPage, (page - 1) * eventsPerPage + eventsPerPage)
-                            : rows
-                        ).map(row => (
-                            <TableRow key={row.name} className={classes.eventRow}>
-                                <TableCell component="th" scope="row">
-                                    <CoreTypography variant="body2">{row.name}</CoreTypography>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <CoreTypography variant="body2">
-                                        {row.endDate?.toLocaleDateString("en-us", {
-                                            month: "2-digit",
-                                            day: "2-digit",
-                                            year: "numeric",
-                                        })}
-                                    </CoreTypography>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <CoreTypography variant="body2">{row.hours}</CoreTypography>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    {page == numPages && emptyRows > 0 && (
+                    {attendedEventsState.map(row => (
+                        <TableRow key={row.name} className={classes.eventRow}>
+                            <TableCell component="th" scope="row">
+                                <CoreTypography variant="body2">{row.name}</CoreTypography>
+                            </TableCell>
+                            <TableCell align="center">
+                                <CoreTypography variant="body2">
+                                    {row.endDate?.toLocaleDateString("en-us", {
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        year: "numeric",
+                                    })}
+                                </CoreTypography>
+                            </TableCell>
+                            <TableCell align="center">
+                                <CoreTypography variant="body2">{row.hours}</CoreTypography>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                    {emptyRows > 0 && emptyRows !== eventsPerPage && (
                         <TableRow style={{ height: 58 * emptyRows }}>
                             <TableCell colSpan={3} style={{ border: "none" }} />
                         </TableRow>
                     )}
-                    {numPages === 0 && (
+                    {page === 1 && emptyRows === eventsPerPage && (
                         <TableRow style={{ height: 58 * emptyRows }}>
                             <TableCell
                                 colSpan={3}
@@ -97,12 +104,36 @@ export default function VolunteerEventsList(props: Volunteer) {
             <div className={classes.tableFooter}>
                 <div />
                 <div>
-                    <Pagination count={numPages} page={page} onChange={handleChange} />
+                    <Pagination page={page} onChange={pageChangeHandler} />
                 </div>
                 <div />
             </div>
         </TableContainer>
     );
+};
+
+export async function getStaticProps(context: GetStaticPropsContext) {
+    const volId = context.params?.volId as string;
+    try {
+        const response = await fetch(`${urls.api.volunteers}/${volId}/events/?page=1`, { method: "GET" });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const attendedEvents: Event[] = (await response.json()).payload as Event[];
+
+        return {
+            props: {
+                volId: volId,
+                attendedEvents: attendedEvents,
+            },
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            props: {
+                volId: volId,
+                events: [],
+            },
+        };
+    }
 }
 
 // style attended event table header row cells
@@ -143,6 +174,8 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
+export default VolunteerEventsList;
+/*
 //create dummy data for design purposes -- comment out to use volId data
 function createData(name: string, endDate: Date, hours: number) {
     return { name, endDate, hours };
@@ -171,3 +204,4 @@ const rows = [
     createData("Keep the TN River Beautiful Knoxville Clean Up 2", new Date("2021-02-22"), 2),
     createData("February Saturday Spruce Up 3", new Date("2021-02-20"), 2),
 ];
+*/
