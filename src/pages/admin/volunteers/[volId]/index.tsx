@@ -99,7 +99,7 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
                         </button>
                     </div>
                 </Paper>
-                {vol._id !== undefined && <VolunteerEventsList {...{ volId: vol._id, attendedEvents: [] }} />}
+                <VolunteerEventsList {...vol} />
             </div>
         </>
     );

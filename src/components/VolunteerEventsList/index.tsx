@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Event, Volunteer } from "utils/types";
 import CoreTypography from "src/components/core/typography/CoreTypography";
 import colors from "src/components/core/colors";
@@ -12,33 +12,48 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import SortIcon from "@material-ui/icons/Sort";
-import Pagination from "@material-ui/lab/Pagination";
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import urls from "utils/urls";
 
-interface Props {
-    volId: string;
-    attendedEvents: Event[];
-}
-
-// create attended events table for current volunteer
-const VolunteerEventsList: NextPage<Props> = ({ volId, attendedEvents }) => {
+const VolunteerEventsList = (vol: Volunteer) => {
     const classes = useStyles();
-    const eventsPerPage = 6;
+    const eventsPerPage = 3;
     const [page, setPage] = useState<number>(1);
-    const [attendedEventsState, setAttendedEvents] = useState<Event[]>(attendedEvents);
+    const [attendedEvents, setAttendedEvents] = useState<Event[]>([]);
+    const volId = vol._id == undefined ? "" : vol._id;
+    const totalEvents = vol.attendedEvents?.length;
 
-    const pageChangeHandler = async (event: React.ChangeEvent<unknown>, newPage: number) => {
-        setPage(newPage);
-        const response = await fetch(`${urls.api.volunteers}/${volId}/events/?page=${page}`, { method: "GET" });
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const newAttendedEvents: Event[] = (await response.json()).payload as Event[];
-        setAttendedEvents(newAttendedEvents);
+    useEffect(() => {
+        const getPaginatedEvents = async () => {
+            try {
+                const response = await fetch(`${urls.api.volunteers}/${volId}/events/?page=${page}`, { method: "GET" });
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const newAttendedEvents: Event[] = (await response.json()).payload as Event[];
+                setAttendedEvents(newAttendedEvents);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        void getPaginatedEvents();
+    }, [volId, page]); //only rerun when page changes
+
+    const handlePageChange = (direction: string) => {
+        switch (direction) {
+            case "next":
+                setPage(page + 1);
+                break;
+            case "prev":
+                if (page !== 1) {
+                    setPage(page - 1);
+                }
+                break;
+            default:
+                break;
+        }
     };
 
-    // Uncomment to use actual volunteer data for volId from server
-    // const rows: Array<Event> = props.attendedEvents ? props.attendedEvents : [];
-
-    const emptyRows = attendedEventsState ? eventsPerPage - attendedEventsState.length : eventsPerPage;
+    const emptyRows = attendedEvents ? eventsPerPage - attendedEvents.length : eventsPerPage;
 
     return (
         <TableContainer component={Paper} className={classes.tableContainer}>
@@ -63,31 +78,28 @@ const VolunteerEventsList: NextPage<Props> = ({ volId, attendedEvents }) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {attendedEventsState.map(row => (
-                        <TableRow key={row.name} className={classes.eventRow}>
-                            <TableCell component="th" scope="row">
-                                <CoreTypography variant="body2">{row.name}</CoreTypography>
-                            </TableCell>
-                            <TableCell align="center">
-                                <CoreTypography variant="body2">
-                                    {row.endDate?.toLocaleDateString("en-us", {
-                                        month: "2-digit",
-                                        day: "2-digit",
-                                        year: "numeric",
-                                    })}
-                                </CoreTypography>
-                            </TableCell>
-                            <TableCell align="center">
-                                <CoreTypography variant="body2">{row.hours}</CoreTypography>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                    {emptyRows > 0 && emptyRows !== eventsPerPage && (
+                    {attendedEvents.length > 0 &&
+                        attendedEvents.map(row => (
+                            <TableRow key={row.name} className={classes.eventRow}>
+                                <TableCell component="th" scope="row">
+                                    <CoreTypography variant="body2">{row.name}</CoreTypography>
+                                </TableCell>
+                                <TableCell align="center">
+                                    <CoreTypography variant="body2">
+                                        {row.startDate?.toString().split("T")[0]}
+                                    </CoreTypography>
+                                </TableCell>
+                                <TableCell align="center">
+                                    <CoreTypography variant="body2">{row.hours}</CoreTypography>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    {emptyRows > 0 && emptyRows != eventsPerPage && (
                         <TableRow style={{ height: 58 * emptyRows }}>
                             <TableCell colSpan={3} style={{ border: "none" }} />
                         </TableRow>
                     )}
-                    {page === 1 && emptyRows === eventsPerPage && (
+                    {page == 1 && emptyRows == eventsPerPage && (
                         <TableRow style={{ height: 58 * emptyRows }}>
                             <TableCell
                                 colSpan={3}
@@ -104,37 +116,18 @@ const VolunteerEventsList: NextPage<Props> = ({ volId, attendedEvents }) => {
             <div className={classes.tableFooter}>
                 <div />
                 <div>
-                    <Pagination page={page} onChange={pageChangeHandler} />
+                    <button className={classes.iconButton} onClick={() => handlePageChange("prev")}>
+                        <ChevronLeftIcon />
+                    </button>
+                    <button className={classes.iconButton} onClick={() => handlePageChange("next")}>
+                        <ChevronRightIcon />
+                    </button>
                 </div>
                 <div />
             </div>
         </TableContainer>
     );
 };
-
-export async function getStaticProps(context: GetStaticPropsContext) {
-    const volId = context.params?.volId as string;
-    try {
-        const response = await fetch(`${urls.api.volunteers}/${volId}/events/?page=1`, { method: "GET" });
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const attendedEvents: Event[] = (await response.json()).payload as Event[];
-
-        return {
-            props: {
-                volId: volId,
-                attendedEvents: attendedEvents,
-            },
-        };
-    } catch (error) {
-        console.log(error);
-        return {
-            props: {
-                volId: volId,
-                events: [],
-            },
-        };
-    }
-}
 
 // style attended event table header row cells
 const StyledTableCell = withStyles((theme: Theme) =>
@@ -171,37 +164,11 @@ const useStyles = makeStyles((theme: Theme) =>
             alignItems: "end",
             justifyContent: "space-between",
         },
+        iconButton: {
+            background: "inherit",
+            border: "none",
+        },
     })
 );
 
 export default VolunteerEventsList;
-/*
-//create dummy data for design purposes -- comment out to use volId data
-function createData(name: string, endDate: Date, hours: number) {
-    return { name, endDate, hours };
-}
-
-const rows = [
-    createData("February Saturday Spruce Up", new Date("2021-02-15"), 2),
-    createData("2021 North Knoxville Community Clean Up", new Date("2021-02-16"), 4),
-    createData("Keep the TN River Beautiful Knoxville Clean Up", new Date("2021-02-12"), 3),
-    createData("February Saturday Spruce Up 2", new Date("2021-02-05"), 2),
-    createData("2021 North Knoxville Community Clean Up 2", new Date("2021-02-15"), 1),
-    createData("Keep the TN River Beautiful Knoxville Clean Up 2", new Date("2021-02-22"), 2),
-    createData("February Saturday Spruce Up 3", new Date("2021-02-20"), 2),
-    createData("January Saturday Spruce Up", new Date("2021-01-10"), 1),
-    createData("2020 North Knoxville Community Clean Up", new Date("2020-02-16"), 4),
-    createData("Keep the Little River Beautiful Knoxville Clean Up", new Date("2020-04-12"), 3),
-    createData("February Saturday Spruce Up 5", new Date("2021-02-05"), 2),
-    createData("2021 South Knoxville Community Clean Up", new Date("2021-03-1"), 1),
-    createData("Keep the TN River Beautiful Knoxville Clean Up 2", new Date("2021-02-22"), 2),
-    createData("February Saturday Spruce Up 3", new Date("2021-02-20"), 2),
-    createData("February Saturday Spruce Up", new Date("2021-02-15"), 2),
-    createData("2021 North Knoxville Community Clean Up", new Date("2021-02-16"), 4),
-    createData("Keep the TN River Beautiful Knoxville Clean Up", new Date("2021-02-12"), 3),
-    createData("February Saturday Spruce Up 2", new Date("2021-02-05"), 2),
-    createData("2021 North Knoxville Community Clean Up 2", new Date("2021-02-15"), 1),
-    createData("Keep the TN River Beautiful Knoxville Clean Up 2", new Date("2021-02-22"), 2),
-    createData("February Saturday Spruce Up 3", new Date("2021-02-20"), 2),
-];
-*/
