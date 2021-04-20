@@ -3,7 +3,7 @@ import VolunteerEventsList from "../../../../components/VolunteerEventsList";
 import { getVolunteer } from "server/actions/Volunteer";
 import { Volunteer } from "utils/types";
 import { GetStaticPropsContext, NextPage } from "next";
-import { Router, useRouter } from "next/router";
+import { useRouter } from "next/router";
 import Error from "next/error";
 import constants from "utils/constants";
 import urls from "utils/urls";
@@ -33,6 +33,16 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
     const handleEditClick = async () => {
         if (vol._id) {
             await router.push(urls.pages.updateVolunteer(vol._id));
+        }
+    };
+
+    const handleSendVerificationEmail = async () => {
+        try {
+            if (vol._id) {
+                await fetch(`${urls.api.volunteers}/${vol._id}/email`, { method: "PUT" });
+            }
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -91,7 +101,7 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
                         <CoreTypography variant="body1" style={{ fontSize: "35px" }}>
                             {firstName}&apos;s Events
                         </CoreTypography>
-                        <button className={classes.hoursVerificationButton}>
+                        <button className={classes.hoursVerificationButton} onClick={handleSendVerificationEmail}>
                             <CoreTypography variant="body2">
                                 <EmailIcon fontSize="large" style={{ verticalAlign: "middle" }} />
                                 &nbsp;&nbsp;Total Hours Verification
