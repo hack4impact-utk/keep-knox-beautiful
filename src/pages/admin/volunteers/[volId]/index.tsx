@@ -247,7 +247,7 @@ const useStyles = makeStyles((theme: Theme) =>
             color: colors.white,
             backgroundColor: colors.orange,
             border: "none",
-            padding: "0 8px",
+            padding: "4px 10px",
             borderRadius: "10px",
             [theme.breakpoints.between(0, "sm")]: {
                 padding: "0 4px",
