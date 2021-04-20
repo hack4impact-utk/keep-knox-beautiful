@@ -99,7 +99,7 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
                         </button>
                     </div>
                 </Paper>
-                <VolunteerEventsList {...vol} />
+                {vol._id !== undefined && <VolunteerEventsList {...{ volId: vol._id, attendedEvents: [] }} />}
             </div>
         </>
     );
@@ -235,7 +235,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         hoursVerificationButton: {
             color: colors.white,
-            backgroundColor: colors.pink,
+            backgroundColor: colors.orange,
             border: "none",
             padding: "0 8px",
             borderRadius: "10px",
