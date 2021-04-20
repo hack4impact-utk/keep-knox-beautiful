@@ -3,7 +3,6 @@ import { Event, Volunteer } from "utils/types";
 import CoreTypography from "src/components/core/typography/CoreTypography";
 import colors from "src/components/core/colors";
 import { createStyles, makeStyles, Theme, withStyles } from "@material-ui/core/styles";
-import { GetStaticPropsContext, NextPage } from "next";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -21,9 +20,12 @@ const VolunteerEventsList = (vol: Volunteer) => {
     const eventsPerPage = 3;
     const [page, setPage] = useState<number>(1);
     const [attendedEvents, setAttendedEvents] = useState<Event[]>([]);
-    const volId = vol._id == undefined ? "" : vol._id;
-    const totalEvents = vol.attendedEvents?.length;
+    const [prevAvailable, setPrevAvailable] = useState<boolean>(false);
+    const [nextAvailable, setNextAvailable] = useState<boolean>(false);
+    const volId = vol._id || "";
+    const totalEvents = vol.attendedEvents?.length || 0;
 
+    /* get the attended events for current page */
     useEffect(() => {
         const getPaginatedEvents = async () => {
             try {
@@ -31,20 +33,35 @@ const VolunteerEventsList = (vol: Volunteer) => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 const newAttendedEvents: Event[] = (await response.json()).payload as Event[];
                 setAttendedEvents(newAttendedEvents);
+
+                /* determine if next and prev buttons should be available to click, opacity to .4 if not */
+                if (prevAvailable && page === 1) {
+                    setPrevAvailable(false);
+                } else if (!prevAvailable && page > 1) {
+                    setPrevAvailable(true);
+                }
+                if (totalEvents >= eventsPerPage * page) {
+                    setNextAvailable(true);
+                } else {
+                    setNextAvailable(false);
+                }
             } catch (error) {
                 console.log(error);
             }
         };
         void getPaginatedEvents();
-    }, [volId, page]); //only rerun when page changes
+    }, [volId, page, prevAvailable, nextAvailable, totalEvents]); //only rerun when page changes
 
+    /* logic to handle clicks and whether next or prev pages are available */
     const handlePageChange = (direction: string) => {
         switch (direction) {
             case "next":
-                setPage(page + 1);
+                if (nextAvailable) {
+                    setPage(page + 1);
+                }
                 break;
             case "prev":
-                if (page !== 1) {
+                if (prevAvailable) {
                     setPage(page - 1);
                 }
                 break;
@@ -116,10 +133,18 @@ const VolunteerEventsList = (vol: Volunteer) => {
             <div className={classes.tableFooter}>
                 <div />
                 <div>
-                    <button className={classes.iconButton} onClick={() => handlePageChange("prev")}>
+                    <button
+                        className={classes.iconButton}
+                        style={prevAvailable ? { opacity: "1" } : { opacity: ".4" }}
+                        onClick={() => handlePageChange("prev")}
+                    >
                         <ChevronLeftIcon />
                     </button>
-                    <button className={classes.iconButton} onClick={() => handlePageChange("next")}>
+                    <button
+                        className={classes.iconButton}
+                        style={nextAvailable ? { opacity: "1" } : { opacity: ".4" }}
+                        onClick={() => handlePageChange("next")}
+                    >
                         <ChevronRightIcon />
                     </button>
                 </div>
@@ -149,7 +174,7 @@ const useStyles = makeStyles((theme: Theme) =>
             width: "90vw",
             minWidth: "300px",
             maxWidth: "1400px",
-            minHeight: "450px",
+            minHeight: "300px",
             padding: "10px 8px",
             backgroundColor: colors.white,
         },
@@ -157,7 +182,7 @@ const useStyles = makeStyles((theme: Theme) =>
             borderBottom: `2px solid ${theme.palette.text.secondary}`,
         },
         tableFooter: {
-            marginTop: "45px",
+            marginTop: "90px",
             height: "35px",
             width: "100%",
             display: "flex",
@@ -166,7 +191,12 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         iconButton: {
             background: "inherit",
-            border: "none",
+            outline: "none",
+            borderStyle: "none",
+            "&:active": {
+                border: "none",
+                outline: "none",
+            },
         },
     })
 );
