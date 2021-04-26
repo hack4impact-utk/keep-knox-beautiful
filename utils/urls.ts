@@ -1,7 +1,7 @@
 const prod = process.env.NODE_ENV === "production";
 
 export default {
-    baseUrl: prod ? "http://prod_domain_here!" : "http://localhost:3000",
+    baseUrl: prod ? "http://localhost:3000" : "http://localhost:3000",
     dbUrl: process.env.MONGO_DB ?? "mongodb://localhost:27017",
     pages: {
         index: "/",
@@ -26,5 +26,9 @@ export default {
         volunteers: "/api/volunteers",
         volunteer: (volId: string) => `/api/volunteers/${volId}`,
         sendVerificationEmail: (volId: string) => `/api/volunteers/${volId}/email`,
+        login: "/api/admin/login",
+        logout: "/api/admin/logout",
+        createAdminAccount: "/api/admin/signup",
+        validateLogin: "/api/admin/validateLogin",
     },
 };
