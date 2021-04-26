@@ -55,3 +55,10 @@ export interface ApiResponse {
     message?: string;
     payload?: unknown;
 }
+
+// used to keep track for display
+// purposes
+export interface EventVolunteer {
+    volunteer: Volunteer;
+    present: boolean;
+}

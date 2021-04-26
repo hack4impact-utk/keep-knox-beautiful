@@ -1,5 +1,5 @@
 // utils
-import React, { useState, ReactNode } from "react";
+import React, { useState, ReactNode, useRef } from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
 
@@ -24,6 +24,8 @@ import ScheduleOutlinedIcon from "@material-ui/icons/ScheduleOutlined";
 import { Event } from "utils/types";
 import constants from "utils/constants";
 import colors from "src/components/core/colors";
+import urls from "utils/urls";
+import Link from "next/link";
 
 interface Props {
     event: Event;
@@ -60,22 +62,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
 
     // state
     const [hover, setHover] = useState(false);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [menuOpen, setMenuOpen] = useState(false);
-
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setAnchorEl(event.currentTarget);
-        setMenuOpen(true);
-        console.log(event.currentTarget, anchorEl);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-        setMenuOpen(false);
-    };
-
     // helper func to render image or placeholder thumbnail
     const EventThumbnail: React.FC<ThumbProps> = ({ children, localHover = false }) => {
         const hasImage = event.image !== undefined;
@@ -101,6 +87,45 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
         );
     };
 
+    // the console yells at me, but this works
+    const MoreButton: React.FC = () => {
+        const anchorRef = useRef(null);
+        const [menuOpen, setMenuOpen] = useState(false);
+
+        const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            setMenuOpen(true);
+        };
+
+        const handleClose = (event: React.MouseEvent<HTMLElement>) => {
+            event.stopPropagation();
+            setMenuOpen(false);
+        };
+
+        return (
+            <React.Fragment>
+                <IconButton
+                    aria-label="more options"
+                    aria-haspopup="true"
+                    aria-controls="simple-menu"
+                    onClick={e => handleClick(e)}
+                    style={{ position: "absolute", zIndex: 1000, top: "3%" }}
+                >
+                    <MoreVertIcon htmlColor="white" ref={anchorRef} />
+                </IconButton>
+                <Menu id="simple-menu" anchorEl={anchorRef.current} open={menuOpen} style={{ top: 50 }}>
+                    <Link href={urls.pages.updateEvent(event._id!)}>
+                        <MenuItem onClick={handleClose}>Edit</MenuItem>
+                    </Link>
+                    <Link href={urls.pages.manageEvent(event._id!)}>
+                        <MenuItem onClick={handleClose}>Manage</MenuItem>
+                    </Link>
+                    <MenuItem onClick={handleClose}>Delete</MenuItem>
+                </Menu>
+            </React.Fragment>
+        );
+    };
+
     const handleHover = (event: React.MouseEvent) => {
         setHover(true);
     };
@@ -110,7 +135,7 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
     };
 
     return (
-        <div>
+        <React.Fragment>
             <Card
                 onMouseEnter={e => handleHover(e)}
                 onMouseLeave={e => handleHoverLeave(e)}
@@ -137,14 +162,7 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
                     </Box>
                     {isAdmin ? (
                         <div className={classes.thumbnailOverlay} style={hover ? { opacity: 1 } : { opacity: 0 }}>
-                            <IconButton
-                                aria-label="more options"
-                                aria-haspopup="true"
-                                onClick={e => handleClick(e)}
-                                style={{ position: "absolute", zIndex: 1000, top: "3%" }}
-                            >
-                                <MoreVertIcon htmlColor="white" />
-                            </IconButton>
+                            <MoreButton />
                         </div>
                     ) : null}
                 </EventThumbnail>
@@ -208,12 +226,7 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
                 </CardContent>
                 {/* </CardActionArea> */}
             </Card>
-            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={menuOpen}>
-                <MenuItem onClick={handleClose}>Edit</MenuItem>
-                <MenuItem onClick={handleClose}>Manage</MenuItem>
-                <MenuItem onClick={handleClose}>Delete</MenuItem>
-            </Menu>
-        </div>
+        </React.Fragment>
     );
 };
 
