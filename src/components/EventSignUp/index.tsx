@@ -179,10 +179,10 @@ const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         container: {
             display: "flex",
-            paddingLeft: "0",
-            paddingRight: "0",
+            padding: "0",
+            margin: "0",
             flexDirection: "column",
-            width: "375px",
+            width: "450px",
         },
         textWrapper: {
             paddingBottom: "20px",
@@ -205,6 +205,7 @@ const useStyles = makeStyles((theme: Theme) =>
             fontSize: "20px",
             marginRight: "20px",
             borderStyle: "solid",
+            borderWidth: "1px",
             textIndent: "10px",
             marginTop: "15px",
             width: "50%",
@@ -217,6 +218,7 @@ const useStyles = makeStyles((theme: Theme) =>
             height: "40px",
             fontSize: "20px",
             borderStyle: "solid",
+            borderWidth: "1px",
             textIndent: "10px",
             marginTop: "15px",
             width: "50%",
@@ -230,6 +232,7 @@ const useStyles = makeStyles((theme: Theme) =>
             fontSize: "20px",
             marginRight: "20px",
             borderStyle: "solid",
+            borderWidth: "1px",
             textIndent: "10px",
             marginTop: "30px",
             width: "100%",
@@ -281,6 +284,7 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingTop: "10px",
             paddingLeft: "0px",
             paddingRight: "0px",
+            textAlign: "center",
         },
         donateButton: {
             marginTop: "15px",
