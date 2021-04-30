@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import VolunteerEventsList from "../../../../components/VolunteerEventsList";
 import { getVolunteer } from "server/actions/Volunteer";
 import { Volunteer } from "utils/types";
@@ -23,6 +23,7 @@ interface Props {
 const VolunteerPage: NextPage<Props> = ({ vol }) => {
     const classes = useStyles();
     const router = useRouter();
+    const [emailSuccess, setEmailSuccess] = useState<boolean>(false);
 
     if (!vol) {
         return <Error statusCode={404} />;
@@ -39,7 +40,10 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
     const handleSendVerificationEmail = async () => {
         try {
             if (vol._id) {
-                await fetch(`${urls.api.volunteers}/${vol._id}/email`, { method: "PUT" });
+                const res = await fetch(`${urls.api.volunteers}/${vol._id}/email`, { method: "PUT" });
+                if (res.status === 200) {
+                    setEmailSuccess(true);
+                }
             }
         } catch (error) {
             console.log(error);
@@ -104,7 +108,7 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
                         <button className={classes.hoursVerificationButton} onClick={handleSendVerificationEmail}>
                             <CoreTypography variant="body2">
                                 <EmailIcon fontSize="large" style={{ verticalAlign: "middle" }} />
-                                &nbsp;&nbsp;Total Hours Verification
+                                &nbsp;&nbsp;{emailSuccess ? "Verification Sent!" : "Total Hours Verification"}
                             </CoreTypography>
                         </button>
                     </div>
@@ -252,6 +256,9 @@ const useStyles = makeStyles((theme: Theme) =>
             [theme.breakpoints.between(0, "sm")]: {
                 padding: "0 4px",
             },
+            "&:active": {
+                transform: "scale(0.75)",
+            },
         },
         navIcon: {
             border: "none",
@@ -259,7 +266,7 @@ const useStyles = makeStyles((theme: Theme) =>
             outline: "none",
             verticalAlign: "top",
             "&:active": {
-                transform: "scale(0.75)",
+                transform: "scale(0.95)",
             },
         },
     })
