@@ -205,23 +205,6 @@ export const deleteEvent = async function (id: string) {
     }
 };
 
-// helper
-export const getEventWithVolFields = async function (eventId: string) {
-    await mongoDB();
-    if (!eventId || eventId == "") {
-        throw new APIError(400, "Invalid id");
-    }
-
-    const event = await EventSchema.findById(eventId)
-        .populate({ path: "registeredVolunteers" })
-        .populate({ path: "attendedVolunteers" });
-    if (!event) {
-        throw new APIError(404, "Event does not exist");
-    }
-
-    return event;
-};
-
 /**
  * @param eventId The id of the event to get volunteers from.
  * @param page Since this data is paginated, page is used to return a certain subset of the data.
@@ -232,7 +215,7 @@ export const getEventWithVolFields = async function (eventId: string) {
  */
 export const getEventVolunteers = async function (eventId: string, page: number, search = "") {
     await mongoDB();
-    const VOLS_PER_PAGE = 2;
+    const VOLS_PER_PAGE = 10;
     const EVENT_FIELDS_JSON = { _id: 1, name: 1, registeredVolunteers: 1, attendedVolunteers: 1 };
     const VOL_FIELDS = "_id name email phone";
     const SORT_COND = { name: 1 };
@@ -369,6 +352,7 @@ export const getEventVolunteers = async function (eventId: string, page: number,
             volunteers = event?.registeredVolunteers as Volunteer[];
             numberRegistered = VOLS_PER_PAGE;
         } else if (totalRegistered > page * VOLS_PER_PAGE) {
+            console.log(page * VOLS_PER_PAGE, numberAttendedMixed);
             // mixed w/ registered + attended
             // both registered + attended needed, can fetch both in 1 query rather than 2
             const event = await EventSchema.findById(eventId)

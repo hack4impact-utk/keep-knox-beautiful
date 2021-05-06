@@ -1,18 +1,15 @@
 import { Switch, TableCell } from "@material-ui/core";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { markVolunteerPresent, markVolunteerNotPresent } from "server/actions/Volunteer";
-import { Event, EventVolunteer } from "utils/types";
+import { APIError, EventVolunteer } from "utils/types";
 import urls from "utils/urls";
 
 interface Props {
-    event: Event;
+    eventId: string;
     eVol: EventVolunteer;
 }
 
-const VolAttendanceListItem: React.FC<Props> = ({ event, eVol }) => {
+const VolAttendanceListItem: React.FC<Props> = ({ eventId, eVol }) => {
     const [present, setPresent] = useState(eVol.present);
-    const router = useRouter();
 
     const toggleAttendance = async function () {
         const fetchOpts: RequestInit = {
@@ -20,11 +17,12 @@ const VolAttendanceListItem: React.FC<Props> = ({ event, eVol }) => {
             mode: "same-origin",
         };
         if (present) {
+            const resp = await fetch(urls.baseUrl + urls.api.markNotPresent(eventId, eVol.volunteer._id!), fetchOpts);
             setPresent(false);
-            await fetch(urls.api.markNotPresent(event._id!, eVol.volunteer._id!), fetchOpts);
         } else {
+            console.log("marking present");
+            await fetch(urls.baseUrl + urls.api.markPresent(eventId, eVol.volunteer._id!), fetchOpts);
             setPresent(true);
-            await fetch(urls.api.markPresent(event._id!, eVol.volunteer._id!), fetchOpts);
         }
     };
     return (

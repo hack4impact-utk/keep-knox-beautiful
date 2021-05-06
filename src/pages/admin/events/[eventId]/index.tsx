@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { NextPage, NextPageContext } from "next";
 import Router from "next/router";
-import { Event, Volunteer, EventVolunteer } from "utils/types";
+import { Event, Volunteer, EventVolunteer, PaginatedVolunteers, APIError } from "utils/types";
 import UpsertEvent from "src/components/UpsertEvent";
-import { getEvent, getEventWithVolFields } from "server/actions/Event";
+import { getEvent, getEventVolunteers } from "server/actions/Event";
 import {
     Container,
     Grid,
@@ -30,7 +30,8 @@ import { markVolunteerNotPresent, markVolunteerPresent } from "server/actions/Vo
 import VolAttendanceListItem from "src/components/VolAttendanceListItem";
 
 interface Props {
-    event: Event;
+    eventId: string;
+    vols?: PaginatedVolunteers;
 }
 
 function orderVolunteers(vols: Volunteer[]): Volunteer[] {
@@ -42,19 +43,11 @@ function orderVolunteers(vols: Volunteer[]): Volunteer[] {
         : [];
 }
 
-const ManageVolunteers: NextPage<Props> = ({ event }) => {
+const ManageVolunteers: NextPage<Props> = ({ vols, eventId }) => {
     const styles = useStyles();
-    // unchecked-in vols first, so that its easier to quickly
-    // sign people in. after that, it orders them alphabetically
-    // b/c were nice also this uses a custom interface to know keep
-    // track if the vol is checked in
-    const uncheckedOrdered = orderVolunteers(event.registeredVolunteers as Volunteer[]).map(
-        (vol: Volunteer): EventVolunteer => ({ volunteer: vol, present: false })
-    );
-    const checkedOrdered = orderVolunteers(event.attendedVolunteers as Volunteer[]).map(
-        (vol: Volunteer): EventVolunteer => ({ volunteer: vol, present: true })
-    );
-    const eventVols = [...uncheckedOrdered, ...checkedOrdered];
+
+    // create EventVolunteers to easily track who signed up for what.
+    const eventVols = vols.volunteers;
 
     return (
         <Container maxWidth="xl" className={styles.container}>
@@ -71,10 +64,16 @@ const ManageVolunteers: NextPage<Props> = ({ event }) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {eventVols.map(eVol => {
+                                {eventVols.map((vol, i) => {
                                     return (
-                                        <TableRow className={styles.tr} key={eVol.volunteer._id}>
-                                            <VolAttendanceListItem event={event} eVol={eVol} />
+                                        <TableRow className={styles.tr} key={i}>
+                                            <VolAttendanceListItem
+                                                eventId={eventId}
+                                                eVol={{
+                                                    present: i >= vols.registeredCount ? true : false,
+                                                    volunteer: vol,
+                                                }}
+                                            />
                                         </TableRow>
                                     );
                                 })}
@@ -109,13 +108,28 @@ export async function getServerSideProps(context: NextPageContext) {
     const eventId = context.query.eventId as string;
 
     // this func is run on server-side, so we can safely fetch the event directly
-    const event: Event = await getEventWithVolFields(eventId);
+    try {
+        const resp = await fetch(urls.baseUrl + urls.api.eventVolunteers(eventId, 1));
 
-    return {
-        props: {
-            event: JSON.parse(JSON.stringify(event)) as Event,
-        },
-    };
+        const data = await resp.json();
+
+        if (Math.floor(resp.status / 100) !== 2 || !data.success) {
+            throw new Error(data.message);
+        }
+
+        const vols = data.payload;
+
+        return {
+            props: {
+                eventId: eventId,
+                vols: vols,
+            },
+        };
+    } catch (e) {
+        console.log(e);
+    }
+
+    // console.log(vols);
 }
 
 export default ManageVolunteers;
