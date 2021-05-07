@@ -281,7 +281,7 @@ export const getEventVolunteers = async function (eventId: string, page: number,
             };
             volunteers = await getEventVolsQueryWithSearch(query, config);
 
-            numberRegistered = VOLS_PER_PAGE;
+            numberRegistered = volunteers.length;
         } else if (totalRegistered > page * VOLS_PER_PAGE) {
             // mixed w/ registered + attended
             const registeredQuery = {
@@ -306,8 +306,8 @@ export const getEventVolunteers = async function (eventId: string, page: number,
             const attendedPromise = getEventVolsQueryWithSearch(attendedQuery, config);
 
             const [registered, attended] = await Promise.all([registeredPromise, attendedPromise]);
+            numberRegistered = registered.length;
             volunteers = registered.concat(attended);
-            numberRegistered = numberRegisteredMixed;
         } else {
             const query = {
                 eventId: eventId,
@@ -349,10 +349,11 @@ export const getEventVolunteers = async function (eventId: string, page: number,
             };
             const event = await getEventVolsQuery(query, config);
 
+            // since vols can be deleted, numRegistered is based off the array
+            // length rather than what we think the length should be
+            numberRegistered = event?.registeredVolunteers?.length || 0;
             volunteers = event?.registeredVolunteers as Volunteer[];
-            numberRegistered = VOLS_PER_PAGE;
         } else if (totalRegistered > page * VOLS_PER_PAGE) {
-            console.log(page * VOLS_PER_PAGE, numberAttendedMixed);
             // mixed w/ registered + attended
             // both registered + attended needed, can fetch both in 1 query rather than 2
             const event = await EventSchema.findById(eventId)
@@ -375,8 +376,8 @@ export const getEventVolunteers = async function (eventId: string, page: number,
                     },
                 });
 
+            numberRegistered = event?.registeredVolunteers?.length || 0;
             volunteers = event?.registeredVolunteers?.concat(event?.attendedVolunteers as Volunteer[]) as Volunteer[];
-            numberRegistered = numberRegisteredMixed;
         } else {
             // all attended volunteers
             const query = {

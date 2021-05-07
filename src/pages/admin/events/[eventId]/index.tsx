@@ -31,7 +31,7 @@ import VolAttendanceListItem from "src/components/VolAttendanceListItem";
 
 interface Props {
     eventId: string;
-    vols?: PaginatedVolunteers;
+    vols: PaginatedVolunteers;
 }
 
 function orderVolunteers(vols: Volunteer[]): Volunteer[] {
@@ -109,27 +109,23 @@ export async function getServerSideProps(context: NextPageContext) {
 
     // this func is run on server-side, so we can safely fetch the event directly
     try {
-        const resp = await fetch(urls.baseUrl + urls.api.eventVolunteers(eventId, 1));
-
-        const data = await resp.json();
-
-        if (Math.floor(resp.status / 100) !== 2 || !data.success) {
-            throw new Error(data.message);
-        }
-
-        const vols = data.payload;
+        const volsObj = await getEventVolunteers(eventId, 1);
+        const paginatedVols: PaginatedVolunteers = JSON.parse(JSON.stringify(volsObj));
 
         return {
             props: {
                 eventId: eventId,
-                vols: vols,
+                vols: paginatedVols,
             },
         };
     } catch (e) {
-        console.log(e);
+        return {
+            props: {
+                eventId: eventId,
+                vols: [],
+            },
+        };
     }
-
-    // console.log(vols);
 }
 
 export default ManageVolunteers;
