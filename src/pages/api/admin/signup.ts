@@ -1,20 +1,15 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { markVolunteerPresent } from "server/actions/Volunteer";
 import errors from "utils/errors";
-import { APIError } from "utils/types";
+import { Admin, APIError } from "utils/types";
+import { createAdmin } from "server/actions/Admin";
 
-// POST /api/events/[eventId]/present/[volId] will mark volunteer volId as present for event eventId. - Private
+// @route   POST /api/admin/signup - Create a new admin. - Private
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        if (!req || !req.query || !req.query.eventId || !req.query.volId) {
-            throw new Error("Need an event id and a volunteer id for this route.");
-        }
+        if (req.method === "POST") {
+            const newAdmin = req.body as Admin;
+            await createAdmin(newAdmin);
 
-        if (req.method == "POST") {
-            const eventId = req.query.eventId as string;
-            const volId = req.query.volId as string;
-
-            await markVolunteerPresent(volId, eventId);
             res.status(200).json({
                 success: true,
                 payload: {},

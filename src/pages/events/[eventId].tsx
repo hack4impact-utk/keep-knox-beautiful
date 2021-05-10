@@ -128,9 +128,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
                 <Container className={styles.leftWrapper}>
                     {noImage()}
                     <Container maxWidth="xl" className={styles.caption}>
-                        <Container maxWidth="sm">
-                            <CoreTypography variant="h4"> {event.caption} </CoreTypography>
-                        </Container>
+                        <CoreTypography variant="h4"> {event.caption} </CoreTypography>
                     </Container>
                     <div
                         className={styles.descContainer}
@@ -223,11 +221,10 @@ const useStyles = makeStyles((theme: Theme) =>
             marginRight: "20px",
         },
         eventName: {
-            textAlign: "center",
+            margin: "0",
             minHeight: "110px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
             maxWidth: "500px",
             textAlignLast: "center",
         },
@@ -253,19 +250,18 @@ const useStyles = makeStyles((theme: Theme) =>
         rightWrapper: {
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
             maxWidth: "700px",
             minWidth: "400px",
-            padding: "0px",
+            paddingLeft: "70px",
         },
         cardContainer: {
             padding: "0",
+            paddingBottom: "15px",
             display: "flex",
             flexDirection: "row",
         },
         card: {
-            width: "160px",
+            width: "180px",
             height: "120px",
             margin: "20px",
             marginRight: "30px",
@@ -273,10 +269,12 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         signUpHeader: {
             marginTop: "20px",
-            maxWidth: "450px",
+            width: "450px",
+            padding: "0",
+            margin: "0",
         },
         descContainer: {
-            width: "500px",
+            //width: "100%",
             padding: "20px",
         },
         cardTitle: {
@@ -309,6 +307,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         signUpForm: {
             marginBottom: "100px",
+            padding: "0",
         },
     })
 );

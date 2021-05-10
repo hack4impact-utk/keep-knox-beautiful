@@ -1,20 +1,28 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { markVolunteerPresent } from "server/actions/Volunteer";
+import { Admin, APIError } from "utils/types";
+import { login } from "server/actions/Admin";
+import cookie from "cookie";
 import errors from "utils/errors";
-import { APIError } from "utils/types";
 
-// POST /api/events/[eventId]/present/[volId] will mark volunteer volId as present for event eventId. - Private
+// @route   POST /api/admin/login - Log user in by returning
+//   a cookie with jwt string in the header. - Public
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        if (!req || !req.query || !req.query.eventId || !req.query.volId) {
-            throw new Error("Need an event id and a volunteer id for this route.");
-        }
+        if (req.method === "POST") {
+            const admin = JSON.parse(req.body) as Admin;
+            const jwt = await login(admin);
 
-        if (req.method == "POST") {
-            const eventId = req.query.eventId as string;
-            const volId = req.query.volId as string;
-
-            await markVolunteerPresent(volId, eventId);
+            // cookie lives for 1 week
+            res.setHeader(
+                "Set-Cookie",
+                cookie.serialize("auth", jwt, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV !== "development",
+                    sameSite: "strict",
+                    maxAge: 604800,
+                    path: "/",
+                })
+            );
             res.status(200).json({
                 success: true,
                 payload: {},

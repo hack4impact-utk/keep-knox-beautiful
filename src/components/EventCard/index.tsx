@@ -30,6 +30,7 @@ interface Props {
     isAdmin?: boolean;
     onLoading: () => void;
     loading: boolean;
+    pastEvent: boolean;
 }
 
 interface ThumbProps {
@@ -37,7 +38,9 @@ interface ThumbProps {
     children: ReactNode;
 }
 
-const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading }) => {
+
+const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading, pastEvent }) => {
+
     const classes = useStyles();
     const router = useRouter();
 
@@ -88,7 +91,7 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
 
         return (
             <div
-                className={`${classes.thumbnailPlaceholder}`}
+                className={`${classes.thumbnailPlaceholder} ${pastEvent ? classes.pastEvent : ""}`}
                 id="eventThumb"
                 style={
                     hasImage
@@ -244,6 +247,9 @@ const useStyles = makeStyles((theme: Theme) =>
             height: 200,
             transition: ".3s",
             width: "100%",
+        },
+        pastEvent: {
+            filter: "grayscale(100%)",
         },
         hidden: {
             opacity: 0,
