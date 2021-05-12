@@ -45,16 +45,16 @@ const VolQuickAddDialog: React.FC<Props> = function ({ open, closeDialog, create
         <Dialog open={open} onClose={closeDialog} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">Add Volunteer</DialogTitle>
             <DialogContent>
-                <TextField autoFocus margin="dense" id="name" label="Email Address" type="email" fullWidth />
                 <div>
                     <TextField
-                        id="firstName"
-                        label="First Name"
+                        id="name"
+                        label="Name"
                         type="text"
                         value={values.name}
                         required
                         color="secondary"
                         rowsMax={4}
+                        fullWidth
                         onChange={handleTextChange}
                     />
                     <TextField
@@ -64,16 +64,19 @@ const VolQuickAddDialog: React.FC<Props> = function ({ open, closeDialog, create
                         value={values.email}
                         required
                         rowsMax={4}
+                        fullWidth
                         color="secondary"
                         onChange={handleTextChange}
                     />
                     <InputMask mask="(999) 999-9999" onChange={handleInputMaskChange} value={values.phoneNumber}>
-                        {() => <TextField id="phonenumber" label="Phone Number" rowsMax={4} color="secondary" />}
+                        {() => (
+                            <TextField fullWidth id="phonenumber" label="Phone Number" rowsMax={4} color="secondary" />
+                        )}
                     </InputMask>
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button onClick={closeDialog} color="primary">
+                <Button onClick={closeDialog} color="secondary" variant="outlined">
                     Cancel
                 </Button>
                 <Button
@@ -82,7 +85,7 @@ const VolQuickAddDialog: React.FC<Props> = function ({ open, closeDialog, create
                     }}
                     color="primary"
                 >
-                    Subscribe
+                    Add
                 </Button>
             </DialogActions>
         </Dialog>

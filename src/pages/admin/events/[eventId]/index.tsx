@@ -55,19 +55,33 @@ const ManageVolunteers: NextPage<Props> = ({ vols, event }) => {
 
     const createAndRegisterVol = async function (vol: Volunteer) {
         try {
-            await addVolunteer(vol);
+            const response = await fetch(`${urls.baseUrl}${urls.api.eventQuickadd(event._id!)}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    ...vol,
+                }),
+            });
+            const responseJSON = (await response.json()) as { success: boolean; payload: unknown };
+
+            if (responseJSON.success) {
+                setOpen(false);
+            } else {
+                alert("ERROR creating vol");
+            }
             setOpen(false);
         } catch (e) {
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            alert(`ERROR: ${e}`);
             console.error(e);
         }
     };
 
     return (
-        <Container maxWidth="xl" className={styles.container}>
+        <Container maxWidth={false} className={styles.container}>
             <div className={styles.jumbotron}>
                 <Grid container spacing={0} direction="row" justify="center" style={{ width: "100%" }}>
                     <Grid item xs={12} sm={7} lg={6} className={styles.pageTitle}>
-                        <CoreTypography variant="h1" style={{ color: "white" }}>
+                        <CoreTypography variant="h1" style={{ color: "white", textAlign: "center" }}>
                             {event.name}
                         </CoreTypography>
                     </Grid>
@@ -78,7 +92,8 @@ const ManageVolunteers: NextPage<Props> = ({ vols, event }) => {
                                     onClick={() => {
                                         setOpen(true);
                                     }}
-                                    color="primary"
+                                    variant="contained"
+                                    style={{ backgroundColor: colors.orange, color: "white" }}
                                 >
                                     Add +
                                 </Button>
@@ -88,6 +103,28 @@ const ManageVolunteers: NextPage<Props> = ({ vols, event }) => {
                 </Grid>
             </div>
             <Grid container direction="row" spacing={6} justify="center">
+                <Grid item xs={10} md={8}>
+                    <Grid container direction="row" justify="flex-end">
+                        <TextField
+                            variant="outlined"
+                            label="Search"
+                            margin="dense"
+                            size="small"
+                            style={{ margin: 30 }}
+                            color="secondary"
+                            onChange={() => {
+                                return;
+                            }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </Grid>
+                </Grid>
                 <Grid item xs={10} md={8} lg={6}>
                     <TableContainer component={Paper}>
                         <Table className={styles.table} aria-label="volunteer table">
@@ -133,10 +170,11 @@ const useStyles = makeStyles((theme: Theme) => {
     return createStyles({
         table: {
             minWidth: 500,
+            marginBottom: 50,
         },
         container: {
-            margin: 30,
             width: "100%",
+            padding: 0,
         },
         tr: {
             cursor: "pointer",
@@ -146,8 +184,9 @@ const useStyles = makeStyles((theme: Theme) => {
         },
         jumbotron: {
             width: "100%",
-            height: "55vh",
+            height: "25vh",
             backgroundColor: theme.palette.primary.main,
+            marginBottom: 50,
         },
         pageTitle: {
             display: "flex",
@@ -174,7 +213,8 @@ export async function getServerSideProps(context: NextPageContext) {
 
         return {
             props: {
-                event: event,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                event: JSON.parse(JSON.stringify(event)),
                 vols: paginatedVols,
             },
         };
