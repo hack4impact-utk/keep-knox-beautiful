@@ -49,14 +49,13 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
             console.log(error);
         }
     };
-
     return (
         <>
             <div className={classes.container}>
                 <div className={classes.volInfoContainer}>
                     <Paper className={classes.nameCard} elevation={2}>
                         <div className={classes.nameCardContent}>
-                            <CoreTypography variant="body1" style={{ fontSize: "60px" }}>
+                            <CoreTypography variant={vol.name.length < 15 ? "h1" : "h2"}>
                                 <div className={classes.nameCardTopRow}>
                                     {vol.name}
                                     <div>
@@ -102,9 +101,7 @@ const VolunteerPage: NextPage<Props> = ({ vol }) => {
                 </div>
                 <Paper className={classes.nameHeader} elevation={0}>
                     <div className={classes.nameHeaderContent}>
-                        <CoreTypography variant="body1" style={{ fontSize: "35px" }}>
-                            {firstName}&apos;s Events
-                        </CoreTypography>
+                        <CoreTypography variant="h2">{firstName}&apos;s Events</CoreTypography>
                         <button className={classes.hoursVerificationButton} onClick={handleSendVerificationEmail}>
                             <CoreTypography variant="body2">
                                 <EmailIcon fontSize="large" style={{ verticalAlign: "middle" }} />
@@ -162,32 +159,34 @@ const useStyles = makeStyles((theme: Theme) =>
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            marginTop: "40px",
             justifyContent: "space-between",
-            width: "100%",
+            width: "90vw",
             [theme.breakpoints.between(0, "sm")]: {
                 flexDirection: "column",
-                width: "100%",
             },
         },
         volInfoRight: {
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "space-evenly",
             [theme.breakpoints.between(0, "sm")]: {
                 marginTop: "20px",
-                width: "90%",
+                width: "90vw",
             },
         },
         nameCard: {
             border: `1px solid ${theme.palette.primary.light}`,
-            [theme.breakpoints.between(0, "sm")]: {
-                width: "90%",
-            },
             "&>*": {
                 margin: theme.spacing(1),
                 width: theme.spacing(65),
                 height: theme.spacing(30),
+            },
+            [theme.breakpoints.between(0, "sm")]: {
+                width: "90vw",
+                "&>*": {
+                    width: "90vw",
+                    height: theme.spacing(25),
+                },
             },
         },
         nameCardContent: {
@@ -198,6 +197,9 @@ const useStyles = makeStyles((theme: Theme) =>
             flexDirection: "column",
             alignItems: "left",
             justifyContent: "space-between",
+            [theme.breakpoints.between(0, "sm")]: {
+                paddingLeft: "10px",
+            },
         },
         nameCardTopRow: {
             width: "100%",
@@ -205,7 +207,8 @@ const useStyles = makeStyles((theme: Theme) =>
             flexDirection: "row",
             justifyContent: "space-between",
             [theme.breakpoints.between(0, "sm")]: {
-                width: "90%",
+                width: "100%",
+                paddingRight: "5px",
             },
         },
         nameCardIcons: {
@@ -214,13 +217,18 @@ const useStyles = makeStyles((theme: Theme) =>
         rightCards: {
             marginLeft: "40px",
             border: `1px solid ${theme.palette.primary.light}`,
-            [theme.breakpoints.between(0, "sm")]: {
-                marginLeft: "0px",
-            },
             "&>*": {
                 margin: theme.spacing(1),
                 width: theme.spacing(27),
                 height: theme.spacing(30),
+            },
+            [theme.breakpoints.between(0, "sm")]: {
+                marginLeft: "0px",
+                "&>*": {
+                    margin: theme.spacing(1),
+                    width: "40vw",
+                    height: theme.spacing(30),
+                },
             },
         },
         rightCardsContent: {
@@ -230,14 +238,19 @@ const useStyles = makeStyles((theme: Theme) =>
             border: `1px solid ${theme.palette.primary.light}`,
             marginTop: "50px",
             marginBottom: "30px",
-            width: "100%",
+            width: "90vw",
             "&>*": {
                 width: "100%",
                 margin: theme.spacing(1),
                 height: theme.spacing(7),
             },
             [theme.breakpoints.between(0, "sm")]: {
-                width: "90%",
+                width: "90vw",
+                "&>*": {
+                    width: "100%",
+                    margin: theme.spacing(3),
+                    height: theme.spacing(10),
+                },
             },
         },
         nameHeaderContent: {
@@ -246,6 +259,9 @@ const useStyles = makeStyles((theme: Theme) =>
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            [theme.breakpoints.between(0, "sm")]: {
+                flexDirection: "column",
+            },
         },
         hoursVerificationButton: {
             color: colors.white,
