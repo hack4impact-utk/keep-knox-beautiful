@@ -18,11 +18,18 @@ const VolAttendanceListItem: React.FC<Props> = ({ eventId, eVol }) => {
         };
         if (present) {
             const resp = await fetch(urls.baseUrl + urls.api.markNotPresent(eventId, eVol.volunteer._id!), fetchOpts);
-            setPresent(false);
+            if (resp.status == 200) {
+                setPresent(false);
+            } else {
+                alert(`ERROR: ${resp.status}`);
+            }
         } else {
-            console.log("marking present");
-            await fetch(urls.baseUrl + urls.api.markPresent(eventId, eVol.volunteer._id!), fetchOpts);
-            setPresent(true);
+            const resp = await fetch(urls.baseUrl + urls.api.markPresent(eventId, eVol.volunteer._id!), fetchOpts);
+            if (resp.status == 200) {
+                setPresent(true);
+            } else {
+                alert(`ERROR: ${resp.status}`);
+            }
         }
     };
     return (

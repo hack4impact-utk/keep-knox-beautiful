@@ -30,6 +30,9 @@ import Link from "next/link";
 interface Props {
     event: Event;
     isAdmin?: boolean;
+    onLoading: () => void;
+    loading: boolean;
+    pastEvent: boolean;
 }
 
 interface ThumbProps {
@@ -37,7 +40,7 @@ interface ThumbProps {
     children: ReactNode;
 }
 
-const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
+const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading, pastEvent }) => {
     const classes = useStyles();
     const router = useRouter();
 
@@ -62,13 +65,33 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
 
     // state
     const [hover, setHover] = useState(false);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    function handleLoading() {
+        onLoading();
+    }
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setAnchorEl(event.currentTarget);
+        setMenuOpen(true);
+        console.log(event.currentTarget, anchorEl);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+        setMenuOpen(false);
+    };
+
     // helper func to render image or placeholder thumbnail
     const EventThumbnail: React.FC<ThumbProps> = ({ children, localHover = false }) => {
         const hasImage = event.image !== undefined;
 
         return (
             <div
-                className={`${classes.thumbnailPlaceholder}`}
+                className={`${classes.thumbnailPlaceholder} ${pastEvent ? classes.pastEvent : ""}`}
                 id="eventThumb"
                 style={
                     hasImage
@@ -140,9 +163,10 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false }) => {
                 onMouseEnter={e => handleHover(e)}
                 onMouseLeave={e => handleHoverLeave(e)}
                 onClick={() => {
+                    handleLoading();
                     void router.push(`/events/${event._id as string}`);
                 }}
-                className={`${classes.eventCard}`}
+                className={`${classes.eventCard} ${loading ? classes.cardLoading : ""}`}
                 elevation={hover ? 20 : 7}
             >
                 {/* <CardActionArea> */}
@@ -241,12 +265,18 @@ const useStyles = makeStyles((theme: Theme) =>
             cursor: "pointer",
             minWidth: 300,
         },
+        cardLoading: {
+            cursor: "wait",
+        },
         thumbnailPlaceholder: {
             background: `${theme.palette.secondary.main} url("/${constants.org.images.defaultCard}") no-repeat center`,
             backgroundSize: "100px",
             height: 200,
             transition: ".3s",
             width: "100%",
+        },
+        pastEvent: {
+            filter: "grayscale(100%)",
         },
         hidden: {
             opacity: 0,

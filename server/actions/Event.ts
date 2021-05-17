@@ -215,7 +215,7 @@ export const deleteEvent = async function (id: string) {
  */
 export const getEventVolunteers = async function (eventId: string, page: number, search = "") {
     await mongoDB();
-    const VOLS_PER_PAGE = 10;
+    const VOLS_PER_PAGE = 5;
     const EVENT_FIELDS_JSON = { _id: 1, name: 1, registeredVolunteers: 1, attendedVolunteers: 1 };
     const VOL_FIELDS = "_id name email phone";
     const SORT_COND = { name: 1 };

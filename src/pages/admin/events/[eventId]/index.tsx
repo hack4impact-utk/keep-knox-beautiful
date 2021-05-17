@@ -31,10 +31,12 @@ import { addVolunteer, markVolunteerNotPresent, markVolunteerPresent } from "ser
 import VolAttendanceListItem from "src/components/VolAttendanceListItem";
 import CoreTypography from "src/components/core/typography";
 import VolQuickAddDialog from "src/components/VolQuickAddDialog";
+import InfiniteScroll from "react-infinite-scroll-component";
+import constants from "utils/constants";
 
 interface Props {
     event: Event;
-    vols: PaginatedVolunteers;
+    pageVols: PaginatedVolunteers;
 }
 
 function orderVolunteers(vols: Volunteer[]): Volunteer[] {
@@ -46,12 +48,56 @@ function orderVolunteers(vols: Volunteer[]): Volunteer[] {
         : [];
 }
 
-const ManageVolunteers: NextPage<Props> = ({ vols, event }) => {
+const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
     const styles = useStyles();
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState("");
+    const [vols, setVols] = useState<Volunteer[]>(pageVols.volunteers);
+    const [page, setPage] = useState<number>(1);
+    const [isLastPage, setIsLastPage] = useState<boolean>(false);
 
-    // create EventVolunteers to easily track who signed up for what.
-    const eventVols = vols.volunteers;
+    // helper func to get the vols by search query
+    async function getVolsFromSearch(query: string) {
+        const r = await fetch(`${urls.api.eventVolunteers(event._id, page)}&search=${query}`, {
+            method: "GET",
+        });
+        /* eslint-disable */
+        const response = await r.json();
+        const newVolsData: PaginatedVolunteers = response.payload;
+        /* eslint-enable */
+
+        setVols(newVolsData.volunteers);
+    }
+
+    // helper func to get the vols for a certain page
+    async function getVolsForPage(newPage: number) {
+        const r = await fetch(`${urls.api.eventVolunteers(event._id, newPage)}&search=${search}`, {
+            method: "GET",
+        });
+        if (Math.floor(r.status / 100) !== 2) {
+            alert(`ERROR: ${r.status}, ${r.statusText}`);
+        }
+        /* eslint-disable */
+        const response = await r.json();
+        const newVolsData: PaginatedVolunteers = response.payload;
+        /* eslint-enable */
+        if (newVolsData === undefined) {
+            setIsLastPage(true);
+        } else {
+            setVols(vols.concat(newVolsData.volunteers));
+        }
+        // setIsLastPage(newVolsData.isLastPage);
+    }
+
+    const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(event.target.value);
+        setPage(1);
+        await getVolsFromSearch(event.target.value);
+    };
+    const handleLoadMore = async () => {
+        await getVolsForPage(page + 1);
+        setPage(page + 1);
+    };
 
     const createAndRegisterVol = async function (vol: Volunteer) {
         try {
@@ -87,7 +133,7 @@ const ManageVolunteers: NextPage<Props> = ({ vols, event }) => {
                     </Grid>
                     <Grid item xs={12}>
                         <Grid container spacing={0} direction="row" justify="flex-end" style={{ width: "100%" }}>
-                            <Grid item xs={12} md={4}>
+                            <Grid item xs={4}>
                                 <Button
                                     onClick={() => {
                                         setOpen(true);
@@ -112,9 +158,7 @@ const ManageVolunteers: NextPage<Props> = ({ vols, event }) => {
                             size="small"
                             style={{ margin: 30 }}
                             color="secondary"
-                            onChange={() => {
-                                return;
-                            }}
+                            onChange={handleSearchChange}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -126,33 +170,44 @@ const ManageVolunteers: NextPage<Props> = ({ vols, event }) => {
                     </Grid>
                 </Grid>
                 <Grid item xs={10} md={8} lg={6}>
-                    <TableContainer component={Paper}>
-                        <Table className={styles.table} aria-label="volunteer table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell style={{ fontWeight: "bold" }}>Volunteers</TableCell>
-                                    <TableCell style={{ fontWeight: "bold" }} align="right">
-                                        Present
-                                    </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {eventVols.map((vol, i) => {
-                                    return (
-                                        <TableRow className={styles.tr} key={i}>
-                                            <VolAttendanceListItem
-                                                eventId={event._id!}
-                                                eVol={{
-                                                    present: i >= vols.registeredCount ? true : false,
-                                                    volunteer: vol,
-                                                }}
-                                            />
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <InfiniteScroll
+                        dataLength={vols.length}
+                        next={handleLoadMore}
+                        hasMore={!isLastPage}
+                        loader={<h4>Loading...</h4>}
+                    >
+                        <TableContainer component={Paper}>
+                            <Table className={styles.table} aria-label="volunteer table">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ fontWeight: "bold" }}>Volunteers</TableCell>
+                                        <TableCell style={{ fontWeight: "bold" }} align="right">
+                                            Present
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {vols.map((vol, i) => {
+                                        const evol: EventVolunteer = {
+                                            volunteer: vol,
+                                            present: i >= pageVols.registeredCount,
+                                        };
+                                        return (
+                                            <TableRow className={styles.tr} key={i}>
+                                                <VolAttendanceListItem
+                                                    eventId={event._id!}
+                                                    eVol={{
+                                                        present: i >= pageVols.registeredCount ? true : false,
+                                                        volunteer: vol,
+                                                    }}
+                                                />
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </InfiniteScroll>
                 </Grid>
             </Grid>
             <VolQuickAddDialog
@@ -211,11 +266,13 @@ export async function getServerSideProps(context: NextPageContext) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const paginatedVols: PaginatedVolunteers = JSON.parse(JSON.stringify(volsObj));
 
+        console.log(volsObj);
+
         return {
             props: {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 event: JSON.parse(JSON.stringify(event)),
-                vols: paginatedVols,
+                pageVols: paginatedVols,
             },
         };
     } catch (e) {
