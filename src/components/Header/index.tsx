@@ -47,6 +47,7 @@ const Header: React.FC<Props> = ({ isAdmin }) => {
                         src={`/${constants.org.images.banner}`}
                         className={styles.headerBanner}
                         alt={`${constants.org.name.short} banner`}
+                        style={{ display: isAdmin ? "" : "inline" }} // keep logo if under sm viewpoint for non-admins
                     ></img>
                 </a>
                 {isAdmin && (
@@ -130,6 +131,10 @@ const useStyles = makeStyles((theme: Theme) =>
             [theme.breakpoints.down("sm")]: {
                 padding: "0px 10px 0px 10px",
             },
+        },
+        adminContent: {
+            position: "absolute",
+            right: "20px",
         },
     })
 );

@@ -2,14 +2,13 @@ import React, { useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import Link from "@material-ui/core/Link";
-import constants from "utils/constants";
 import { Button, CircularProgress } from "@material-ui/core";
 import LockIcon from "@material-ui/icons/Lock";
 import PersonIcon from "@material-ui/icons/Person";
 import CoreTypography from "src/components/core/typography";
 import colors from "src/components/core/colors";
 import urls from "utils/urls";
+import { ApiResponse } from "utils/types";
 
 function Login() {
     const styles = useStyles();
@@ -23,17 +22,17 @@ function Login() {
         e.preventDefault();
         setLoading(true);
 
-        const response = await fetch(`${urls.baseUrl}${urls.api.login}`, {
+        const r = await fetch(`${urls.baseUrl}${urls.api.login}`, {
             method: "POST",
             body: JSON.stringify({
                 email: email.current!.value,
                 password: password.current!.value,
             }),
         });
-        const responseJSON = (await response.json()) as { success: boolean; payload: unknown };
+        const response = (await r.json()) as ApiResponse;
 
         setLoading(false);
-        if (responseJSON.success) {
+        if (response.success) {
             setValidLogin(true);
             await router.push(urls.pages.adminHome);
         } else {
@@ -41,19 +40,12 @@ function Login() {
         }
     };
 
-    const onForgotPassword = async () => {
-        console.log("forgot password");
-    };
-
     return (
         <React.Fragment>
             <Container className={styles.container}>
-                <img
-                    src={`/${constants.org.images.banner}`}
-                    alt={`${constants.org.name.short} logo`}
-                    className={styles.banner}
-                />
-                <CoreTypography variant="h2">Welcome Back!</CoreTypography>
+                <CoreTypography variant="h2" style={{ fontFamily: "Roboto", paddingBottom: "25px" }}>
+                    Welcome Back!
+                </CoreTypography>
                 <form onSubmit={onSubmit} className={styles.form}>
                     <input
                         type="email"
@@ -90,9 +82,6 @@ function Login() {
                         <CoreTypography variant="button">LOGIN</CoreTypography>
                     </Button>
                 </form>
-                <Link onClick={onForgotPassword} className={styles.forgotPassword}>
-                    <CoreTypography variant="caption">FORGOT PASSWORD?</CoreTypography>
-                </Link>
             </Container>
         </React.Fragment>
     );
@@ -101,6 +90,7 @@ function Login() {
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         container: {
+            marginTop: "80px",
             display: "flex",
             flexDirection: "column",
             textAlign: "center",

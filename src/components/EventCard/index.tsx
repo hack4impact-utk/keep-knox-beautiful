@@ -1,29 +1,33 @@
 // utils
-import React, { useState, ReactNode } from "react";
+import React, { useState, ReactNode, useRef } from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
 
 // components
 import { Box, Grid } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
-import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import CoreTypography from "../core/typography/CoreTypography";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 // icons
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import RoomOutlinedIcon from "@material-ui/icons/RoomOutlined";
 import ScheduleOutlinedIcon from "@material-ui/icons/ScheduleOutlined";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 // misc
-import { Event } from "utils/types";
+import { Event, ApiResponse } from "utils/types";
 import constants from "utils/constants";
 import colors from "src/components/core/colors";
+import urls from "utils/urls";
+import Link from "next/link";
 
 interface Props {
     event: Event;
@@ -38,11 +42,11 @@ interface ThumbProps {
     children: ReactNode;
 }
 
-
 const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading, pastEvent }) => {
-
     const classes = useStyles();
     const router = useRouter();
+    const [loadingInMenu, setLoadingInMenu] = useState(false);
+    const [successfulDelete, setSuccessfulDelete] = useState(false);
 
     // display variables for event data
     const eventMonth = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
@@ -56,12 +60,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
     const eventEndTime = `${new Date(event.endDate as Date).getHours() % 12 || 12}:${`0${new Date(
         event.endDate as Date
     ).getMinutes()}`.slice(-2)} ${new Date(event.endDate as Date).getHours() > 11 ? "PM" : "AM"}`;
-
-    const eventCaptionLength = 40;
-    const eventCaption =
-        event.caption!.length <= eventCaptionLength
-            ? event.caption
-            : event.caption!.slice(0, eventCaptionLength - 3) + "...";
 
     // state
     const [hover, setHover] = useState(false);
@@ -77,7 +75,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
         event.stopPropagation();
         setAnchorEl(event.currentTarget);
         setMenuOpen(true);
-        console.log(event.currentTarget, anchorEl);
     };
 
     const handleClose = () => {
@@ -110,6 +107,104 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
         );
     };
 
+    const MoreButton: React.FC = () => {
+        const anchorRef = useRef(null);
+        const [menuOpen, setMenuOpen] = useState(false);
+
+        const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            setMenuOpen(true);
+        };
+
+        const handleClose = (event: React.MouseEvent<HTMLElement>) => {
+            event.stopPropagation();
+            setMenuOpen(false);
+            setHover(false);
+        };
+
+        const handleDelete = async (e: React.MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            setLoadingInMenu(true);
+            const confirmed = confirm(`Are you sure you want to delete ${event.name}?`);
+
+            if (confirmed) {
+                // api req to delete event
+                const r = await fetch(urls.api.event(event._id!), {
+                    method: "DELETE",
+                });
+                const response = (await r.json()) as ApiResponse;
+
+                if (!response.success) {
+                    alert(`Delete failed: ${response.message || ""}`);
+                }
+            }
+
+            // show check for 3 seconds before returning back to normal card display
+            setLoadingInMenu(false);
+            setSuccessfulDelete(true);
+            setTimeout(() => {
+                setSuccessfulDelete(false);
+                setMenuOpen(false);
+                setHover(false);
+            }, 3000);
+        };
+
+        const getIcon = () => {
+            if (loadingInMenu) {
+                return <CircularProgress color="secondary" style={{ marginLeft: "5px", marginTop: "5px" }} />;
+            } else if (successfulDelete) {
+                return (
+                    <CheckCircleIcon
+                        color="secondary"
+                        style={{ width: "50px", height: "50px", marginLeft: "5px", marginTop: "5px" }}
+                    />
+                );
+            } else {
+                return (
+                    <IconButton
+                        aria-label="more options"
+                        aria-haspopup="true"
+                        aria-controls="simple-menu"
+                        onClick={e => handleClick(e)}
+                        style={{ position: "absolute", zIndex: 1000, top: "3%" }}
+                    >
+                        <MoreVertIcon htmlColor="white" ref={anchorRef} />
+                    </IconButton>
+                );
+            }
+        };
+
+        return (
+            <React.Fragment>
+                {getIcon()}
+                <Menu
+                    id="simple-menu"
+                    anchorEl={anchorRef.current}
+                    open={menuOpen}
+                    onClose={handleClose}
+                    style={{ top: "50px" }}
+                >
+                    <Link href={urls.pages.updateEvent(event._id!)}>
+                        <MenuItem onClick={handleClose}>
+                            {" "}
+                            <EditIcon /> &nbsp; Edit{" "}
+                        </MenuItem>
+                    </Link>
+                    <Link href={urls.pages.manageEvent(event._id!)}>
+                        <MenuItem onClick={handleClose}>
+                            {" "}
+                            <PersonOutlineIcon /> &nbsp; Manage{" "}
+                        </MenuItem>
+                    </Link>
+                    <MenuItem onClick={handleDelete}>
+                        {" "}
+                        <DeleteIcon /> &nbsp; Delete{" "}
+                    </MenuItem>
+                </Menu>
+            </React.Fragment>
+        );
+    };
+
     const handleHover = (event: React.MouseEvent) => {
         setHover(true);
     };
@@ -119,18 +214,17 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
     };
 
     return (
-        <div>
+        <React.Fragment>
             <Card
                 onMouseEnter={e => handleHover(e)}
                 onMouseLeave={e => handleHoverLeave(e)}
                 onClick={() => {
                     handleLoading();
-                    void router.push(`/events/${event._id as string}`);
+                    void router.push(urls.pages.event(event._id || ""));
                 }}
                 className={`${classes.eventCard} ${loading ? classes.cardLoading : ""}`}
                 elevation={hover ? 20 : 7}
             >
-                {/* <CardActionArea> */}
                 <EventThumbnail localHover={hover}>
                     <Box className={classes.eventDate}>
                         <span>
@@ -147,19 +241,12 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                     </Box>
                     {isAdmin ? (
                         <div className={classes.thumbnailOverlay} style={hover ? { opacity: 1 } : { opacity: 0 }}>
-                            <IconButton
-                                aria-label="more options"
-                                aria-haspopup="true"
-                                onClick={e => handleClick(e)}
-                                style={{ position: "absolute", zIndex: 1000, top: "3%" }}
-                            >
-                                <MoreVertIcon htmlColor="white" />
-                            </IconButton>
+                            <MoreButton />
                         </div>
                     ) : null}
                 </EventThumbnail>
                 <CardContent>
-                    <div style={{ height: 105, overflow: "hidden" }}>
+                    <div style={{ height: 100, overflow: "hidden" }}>
                         <CoreTypography gutterBottom variant="h3" className={classes.title} id="eventName">
                             {event.name}
                         </CoreTypography>
@@ -170,8 +257,9 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                                 fontFamily: "Ubuntu",
                             }}
                             id="eventDesc"
+                            noWrap
                         >
-                            {eventCaption}
+                            {event.caption}
                         </CoreTypography>
                     </div>
                     {/* location and time info */}
@@ -181,9 +269,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                             <CoreTypography
                                 variant="caption"
                                 style={{
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
                                     color: colors.pink,
                                     fontWeight: 600,
                                     fontFamily: "Ubuntu",
@@ -191,6 +276,7 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                                 }}
                                 id="eventLoc"
                                 component="p"
+                                noWrap
                             >
                                 {eventLocation}
                             </CoreTypography>
@@ -216,14 +302,8 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                         </Grid>
                     </Grid>
                 </CardContent>
-                {/* </CardActionArea> */}
             </Card>
-            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={menuOpen}>
-                <MenuItem onClick={handleClose}>Edit</MenuItem>
-                <MenuItem onClick={handleClose}>Manage</MenuItem>
-                <MenuItem onClick={handleClose}>Delete</MenuItem>
-            </Menu>
-        </div>
+        </React.Fragment>
     );
 };
 

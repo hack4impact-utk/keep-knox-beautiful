@@ -1,4 +1,4 @@
-import { getEvent } from "server/actions/Event";
+import { getEvent, getAllEventIds } from "server/actions/Event";
 import { Event } from "utils/types";
 import { GetStaticPropsContext, NextPage } from "next";
 import Error from "next/error";
@@ -122,7 +122,9 @@ const EventPage: NextPage<Props> = ({ event }) => {
                     className={styles.logo}
                     alt={`${constants.org.name.short} logo`}
                 />
-                <CoreTypography variant="h1">Event Description</CoreTypography>
+                <CoreTypography variant="h1" style={{ textAlign: "left" }}>
+                    Event Description
+                </CoreTypography>
             </Container>
             <Container className={styles.contentContainer}>
                 <Container className={styles.leftWrapper}>
@@ -183,25 +185,28 @@ export async function getStaticProps(context: GetStaticPropsContext) {
             props: {
                 event: JSON.parse(JSON.stringify(event)) as Event,
             },
-            revalidate: constants.revalidate.eventDesc,
+            revalidate: constants.revalidate.eventDescription,
         };
     } catch (error) {
         return {
             props: {},
-            revalidate: constants.revalidate.eventDesc,
+            revalidate: constants.revalidate.eventDescription,
         };
     }
 }
 
 // required for dynamic pages: prerender events at build time
 export async function getStaticPaths() {
-    const events: Event[] = []; //await getEvents({});
+    const events: Event[] = await getAllEventIds();
 
     const paths = events.map(event => ({
-        params: { name: event._id },
+        params: { eventId: (event._id as string).toString() },
     }));
 
-    return { paths, fallback: true };
+    return {
+        paths: paths, // all the eventId pages to create at build time
+        fallback: true, // new events may be added so we need to fallback
+    };
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -289,6 +294,14 @@ const useStyles = makeStyles((theme: Theme) =>
             marginRight: "30px",
             borderRadius: 8,
         },
+        center: {
+            [theme.breakpoints.down("sm")]: {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+            },
+        },
         signUpHeader: {
             marginTop: "20px",
             padding: "0",
@@ -331,6 +344,7 @@ const useStyles = makeStyles((theme: Theme) =>
         signUpForm: {
             marginBottom: "100px",
             padding: "0",
+
             [theme.breakpoints.between(0, "sm")]: {
                 width: "90%",
             },

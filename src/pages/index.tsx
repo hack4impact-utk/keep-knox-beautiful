@@ -17,7 +17,6 @@ interface Props {
 
 const Home: NextPage<Props> = ({ currentEvents, pastEvents, width }) => {
     const classes = useStyles();
-
     const [loading, setLoading] = useState(false);
 
     function handleLoading() {
@@ -36,57 +35,55 @@ const Home: NextPage<Props> = ({ currentEvents, pastEvents, width }) => {
                 >
                     <Grid
                         item
-                        xs={12}
+                        xs={7}
                         sm={7}
                         lg={6}
                         style={{
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "center",
-                            paddingLeft: "10%",
-                            marginTop: "20px",
                         }}
                     >
                         <CoreTypography variant="h1" style={{ color: "white" }}>
-                            Upcoming events
+                            Upcoming Events
                         </CoreTypography>
                         <CoreTypography variant="h3" style={{ fontWeight: "normal", color: "white", marginBottom: 30 }}>
                             Join us for a workday!
                         </CoreTypography>
                     </Grid>
-                    {width == "xs" ? null : (
-                        <Grid
-                            item
-                            xs={5}
-                            lg={6}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                        >
-                            <img
-                                src={`/${constants.org.images.logo}`}
-                                alt={`${constants.org.name.short} logo`}
-                                style={{ height: "200px" }}
-                            />
-                        </Grid>
-                    )}
+                    <Grid
+                        item
+                        xs={3}
+                        md={3}
+                        lg={3}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                    >
+                        <img
+                            src={`/${constants.org.images.logo}`}
+                            alt={`${constants.org.name.short} logo`}
+                            className={classes.headerImage}
+                        />
+                    </Grid>
                 </Grid>
             </div>
             <Container disableGutters style={{ marginTop: "-20vh" }}>
-
-                <EventsContainer events={currentEvents} onLoading={handleLoading} loading={loading} pastEvents={false}/>
-
+                <EventsContainer
+                    events={currentEvents}
+                    onLoading={handleLoading}
+                    loading={loading}
+                    pastEvents={false}
+                />
             </Container>
 
             <Container disableGutters maxWidth="lg">
                 <Divider variant="middle" />
-                <CoreTypography variant="h2" style={{ textAlign: "center" }}>
+                <CoreTypography variant="h2" style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "10px" }}>
                     Recent Events
                 </CoreTypography>
             </Container>
 
             <Container disableGutters style={{ marginTop: "0vh", marginBottom: "100px" }}>
-
-                <EventsContainer events={pastEvents} onLoading={handleLoading} loading={loading} />
-
+                <EventsContainer events={pastEvents} onLoading={handleLoading} loading={loading} pastEvents={true} />
             </Container>
         </div>
     );
@@ -102,7 +99,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
                 currentEvents: JSON.parse(JSON.stringify(currentEvents)) as Event[],
                 pastEvents: JSON.parse(JSON.stringify(pastEvents)) as Event[],
             },
-            revalidate: constants.revalidate.upcomingEvents,
+            revalidate: constants.revalidate.index,
         };
     } catch (error) {
         console.log(error);
@@ -110,7 +107,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
             props: {
                 events: [],
             },
-            revalidate: constants.revalidate.upcomingEvents,
+            revalidate: constants.revalidate.index,
         };
     }
 }
@@ -123,6 +120,12 @@ const useStyles = makeStyles((theme: Theme) =>
             backgroundColor: theme.palette.primary.main,
             position: "relative",
             top: 0,
+        },
+        headerImage: {
+            height: "230px",
+            [theme.breakpoints.down("xs")]: {
+                height: "120px",
+            },
         },
         "@global": {
             ".MuiDivider-middle": {

@@ -15,13 +15,13 @@ import {
     InputAdornment,
 } from "@material-ui/core";
 import { Search } from "@material-ui/icons";
-import { GetStaticPropsContext, NextPage } from "next";
+import { GetStaticPropsContext, NextPage, NextPageContext } from "next";
 import Link from "next/link";
 import React, { useState } from "react";
 import { getVolunteers } from "server/actions/Volunteer";
 import colors from "src/components/core/colors";
 import constants from "utils/constants";
-import { Volunteer, LoadMorePaginatedData } from "utils/types";
+import { Volunteer, LoadMorePaginatedData, ApiResponse } from "utils/types";
 import urls from "utils/urls";
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -42,10 +42,8 @@ const VolunteersPage: NextPage<Props> = ({ volsProps, isLastPageProps }) => {
         const r = await fetch(`${urls.api.volunteers}?page=1&search=${query}`, {
             method: "GET",
         });
-        /* eslint-disable */
-        const response = await r.json();
-        const newVolsData: LoadMorePaginatedData = response.payload;
-        /* eslint-enable */
+        const response = (await r.json()) as ApiResponse;
+        const newVolsData = response.payload as LoadMorePaginatedData;
 
         setVols(newVolsData.data);
         setIsLastPage(newVolsData.isLastPage);
@@ -56,10 +54,8 @@ const VolunteersPage: NextPage<Props> = ({ volsProps, isLastPageProps }) => {
         const r = await fetch(`${urls.api.volunteers}?page=${newPage}&search=${search}`, {
             method: "GET",
         });
-        /* eslint-disable */
-        const response = await r.json();
-        const newVolsData: LoadMorePaginatedData = response.payload;
-        /* eslint-enable */
+        const response = (await r.json()) as ApiResponse;
+        const newVolsData = response.payload as LoadMorePaginatedData;
 
         setVols(vols.concat(newVolsData.data));
         setIsLastPage(newVolsData.isLastPage);
@@ -136,21 +132,39 @@ const VolunteersPage: NextPage<Props> = ({ volsProps, isLastPageProps }) => {
     );
 };
 
-export async function getStaticProps(context: GetStaticPropsContext) {
+export async function getServerSideProps(context: NextPageContext) {
     try {
+        // validate admin user
+        const cookie = context.req?.headers.cookie;
+        const response = await fetch(`${urls.baseUrl}${urls.api.validateLogin}`, {
+            method: "POST",
+            headers: {
+                cookie: cookie || "",
+            },
+        });
+
+        // redirect
+        if (response.status !== 200) {
+            context.res?.writeHead(302, {
+                Location: urls.pages.login,
+            });
+            context.res?.end();
+        }
+
         const volsData: LoadMorePaginatedData = await getVolunteers(1);
+        if (!volsData) {
+            throw new Error("Error fetching volunteer data.");
+        }
 
         return {
             props: {
                 volsProps: JSON.parse(JSON.stringify(volsData.data)) as Volunteer[],
                 isLastPageProps: volsData.isLastPage,
             },
-            revalidate: constants.revalidate.allVolunteers,
         };
     } catch (error) {
         return {
-            props: {},
-            revalidate: constants.revalidate.allVolunteers,
+            notFound: true,
         };
     }
 }

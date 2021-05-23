@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { NextPage, NextPageContext } from "next";
+import Link from "next/link";
 import EventsContainer from "src/components/EventsContainer";
 import CoreTypography from "src/components/core/typography";
 import { getCurrentEventsAdmin, getPastEventsAdmin } from "server/actions/Event";
 import constants from "utils/constants";
-import { Event, Admin, LoadMorePaginatedData } from "utils/types";
+import { Event, Admin, LoadMorePaginatedData, ApiResponse } from "utils/types";
 import urls from "utils/urls";
 import colors from "src/components/core/colors";
 import Router from "next/router";
@@ -16,6 +17,7 @@ import { DatePicker } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import TodayIcon from "@material-ui/icons/Today";
+import AddIcon from "@material-ui/icons/Add";
 
 interface Props {
     currentEvents: Event[];
@@ -29,14 +31,19 @@ const Home: NextPage<Props> = ({ currentEvents, pastEvents, width }) => {
     const [pastEventsState, setPastEvents] = useState<Event[]>(pastEvents.data);
     const [searchDate, setSearchDate] = useState<MaterialUiPickersDate>(null);
     const [loadMore, setLoadMore] = useState<boolean>(!pastEvents.isLastPage);
+    const [loading, setLoading] = useState(false);
+
+    function handleLoading() {
+        setLoading(true);
+    }
 
     const loadMoreHandler = async () => {
-        const response = await fetch(
+        const r = await fetch(
             `${urls.api.events}?type=past&page=${nextPage.toString()}&search=${searchDate?.toUTCString() || ""}`,
             { method: "GET" }
         );
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const moreEvents = (await response.json()).payload as LoadMorePaginatedData;
+        const response = (await r.json()) as ApiResponse;
+        const moreEvents = response.payload as LoadMorePaginatedData;
 
         if (moreEvents.isLastPage) {
             setLoadMore(false);
@@ -48,16 +55,16 @@ const Home: NextPage<Props> = ({ currentEvents, pastEvents, width }) => {
     };
 
     const handleSearchDateChange = async (date: MaterialUiPickersDate) => {
-        const response = await fetch(`${urls.api.events}?type=past&page=1&search=${date?.toUTCString() || ""}`, {
+        const r = await fetch(`${urls.api.events}?type=past&page=1&search=${date?.toUTCString() || ""}`, {
             method: "GET",
         });
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const newPastEvents: LoadMorePaginatedData = (await response.json()).payload as LoadMorePaginatedData;
+        const response = (await r.json()) as ApiResponse;
+        const newPastEvents: LoadMorePaginatedData = response.payload as LoadMorePaginatedData;
 
         // no longer appending - this is back to an initial view
         // load more handler will take of loading next pages for search
         setPastEvents(newPastEvents.data);
-        setLoadMore(!pastEvents.isLastPage);
+        setLoadMore(!newPastEvents.isLastPage);
         setSearchDate(date);
         setNextPage(2);
     };
@@ -72,31 +79,40 @@ const Home: NextPage<Props> = ({ currentEvents, pastEvents, width }) => {
                     justify="center"
                     style={{ width: "100%", paddingTop: width == "xs" ? "10%" : "" }}
                 >
-                    {width == "xs" ? null : (
-                        <Grid
-                            item
-                            xs={5}
-                            lg={2}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                        >
-                            <img
-                                src={`/${constants.org.images.logo}`}
-                                alt={`${constants.org.name.short} logo`}
-                                style={{ height: "200px" }}
-                            />
-                        </Grid>
-                    )}
+                    <Grid
+                        item
+                        xs={4}
+                        md={3}
+                        lg={3}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                    >
+                        <img
+                            src={`/${constants.org.images.logo}`}
+                            alt={`${constants.org.name.short} logo`}
+                            className={classes.headerImage}
+                        />
+                    </Grid>
 
-                    <Grid item xs={12} sm={7} lg={6} className={classes.pageTitle}>
+                    <Grid item xs={6} sm={7} lg={6} className={classes.pageTitle}>
                         <CoreTypography variant="h1" style={{ color: "white" }}>
                             Upcoming events
                         </CoreTypography>
-                        {/* TODO button that goes to add event page here */}
+                        <Link href={urls.pages.addEvent}>
+                            <Button variant="contained" className={classes.addEventButton}>
+                                Add<AddIcon></AddIcon>
+                            </Button>
+                        </Link>
                     </Grid>
                 </Grid>
             </div>
             <Container disableGutters style={{ marginTop: "-20vh" }}>
-                <EventsContainer events={currentEvents} />
+                <EventsContainer
+                    events={currentEvents}
+                    admin
+                    onLoading={handleLoading}
+                    loading={loading}
+                    pastEvents={false}
+                />
             </Container>
 
             <Container disableGutters maxWidth="lg">
@@ -131,7 +147,13 @@ const Home: NextPage<Props> = ({ currentEvents, pastEvents, width }) => {
             </Container>
 
             <Container disableGutters style={{ marginTop: "0vh", marginBottom: "100px" }}>
-                <EventsContainer events={pastEventsState} />
+                <EventsContainer
+                    events={pastEventsState}
+                    admin
+                    onLoading={handleLoading}
+                    loading={loading}
+                    pastEvents={false}
+                />
                 <div className={classes.center}>
                     {loadMore && (
                         <Button onClick={loadMoreHandler} className={classes.loadMoreButton}>
@@ -189,13 +211,31 @@ const useStyles = makeStyles((theme: Theme) =>
             height: "55vh",
             backgroundColor: theme.palette.primary.main,
         },
+        headerImage: {
+            height: "230px",
+            [theme.breakpoints.down("xs")]: {
+                height: "120px",
+            },
+        },
         pageTitle: {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            marginTop: "20px",
             [theme.breakpoints.down("xs")]: {
-                alignItems: "center",
+                alignItems: "left",
+            },
+        },
+        addEventButton: {
+            backgroundColor: theme.palette.accent.main,
+            color: colors.white,
+            marginTop: "10px",
+            width: "100px",
+            height: "35px",
+            "&:hover": {
+                backgroundColor: theme.palette.accent.main,
+            },
+            [theme.breakpoints.down("xs")]: {
+                marginLeft: "0px",
             },
         },
         "@global": {
@@ -220,15 +260,19 @@ const useStyles = makeStyles((theme: Theme) =>
             display: "flex",
             position: "relative",
             justifyContent: "center",
+            paddingTop: "30px",
+            paddingBottom: "10px",
             [theme.breakpoints.down("sm")]: {
                 position: "static",
                 flexDirection: "column",
+                marginBottom: "40px",
             },
         },
         pastEventsTitle: {
             display: "flex",
             [theme.breakpoints.down("sm")]: {
-                justifyContent: "center",
+                flexDirection: "column",
+                alignSelf: "center",
             },
         },
         pastEventsSearch: {
@@ -236,10 +280,11 @@ const useStyles = makeStyles((theme: Theme) =>
             right: "100px",
             position: "absolute",
             [theme.breakpoints.down("sm")]: {
-                position: "static",
-                right: "0px",
-                flexDirection: "column",
-                alignSelf: "center",
+                marginTop: "10px",
+                marginLeft: "auto",
+                marginRight: "auto",
+                left: "0",
+                right: "0",
             },
         },
     })
