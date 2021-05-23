@@ -1,4 +1,4 @@
-import { getEvent } from "server/actions/Event";
+import { getEvent, getAllEventIds } from "server/actions/Event";
 import { Event } from "utils/types";
 import { GetStaticPropsContext, NextPage } from "next";
 import Error from "next/error";
@@ -85,7 +85,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
     const noSignUp = () => {
         if (event.maxVolunteers != 0) {
             return (
-                <Container className={styles.center}>
+                <Container style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                     <Container className={styles.signUpHeader}>
                         <CoreTypography variant="h4" style={{ float: "left" }}>
                             Sign Up to Volunteer
@@ -122,7 +122,9 @@ const EventPage: NextPage<Props> = ({ event }) => {
                     className={styles.logo}
                     alt={`${constants.org.name.short} logo`}
                 />
-                <CoreTypography variant="h1">Event Description</CoreTypography>
+                <CoreTypography variant="h1" style={{ textAlign: "left" }}>
+                    Event Description
+                </CoreTypography>
             </Container>
             <Container className={styles.contentContainer}>
                 <Container className={styles.leftWrapper}>
@@ -183,25 +185,28 @@ export async function getStaticProps(context: GetStaticPropsContext) {
             props: {
                 event: JSON.parse(JSON.stringify(event)) as Event,
             },
-            revalidate: constants.revalidate.eventDesc,
+            revalidate: constants.revalidate.eventDescription,
         };
     } catch (error) {
         return {
             props: {},
-            revalidate: constants.revalidate.eventDesc,
+            revalidate: constants.revalidate.eventDescription,
         };
     }
 }
 
 // required for dynamic pages: prerender events at build time
 export async function getStaticPaths() {
-    const events: Event[] = []; //await getEvents({});
+    const events: Event[] = await getAllEventIds();
 
     const paths = events.map(event => ({
-        params: { name: event._id },
+        params: { eventId: (event._id as string).toString() },
     }));
 
-    return { paths, fallback: true };
+    return {
+        paths: paths, // all the eventId pages to create at build time
+        fallback: true, // new events may be added so we need to fallback
+    };
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -225,8 +230,11 @@ const useStyles = makeStyles((theme: Theme) =>
             minHeight: "110px",
             display: "flex",
             alignItems: "center",
-            maxWidth: "500px",
             textAlignLast: "center",
+            [theme.breakpoints.between(0, "sm")]: {
+                justifyContent: "center",
+                minHeight: "70px",
+            },
         },
         caption: {
             marginTop: "50px",
@@ -239,6 +247,11 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingBottom: "100px",
             [theme.breakpoints.between(0, "sm")]: {
                 flexDirection: "column",
+                overflowX: "hidden",
+                paddingLeft: "0px",
+                paddingTop: "50px",
+                paddingBottom: "0px",
+                paddingRight: "0px",
             },
         },
         leftWrapper: {
@@ -246,18 +259,18 @@ const useStyles = makeStyles((theme: Theme) =>
             flexDirection: "column",
             alignItems: "center",
             paddingRight: "0px",
+            [theme.breakpoints.between(0, "sm")]: {
+                paddingLeft: "0px",
+            },
         },
         rightWrapper: {
             display: "flex",
             flexDirection: "column",
             maxWidth: "700px",
-            minWidth: "400px",
             paddingLeft: "70px",
-            [theme.breakpoints.down("sm")]: {
-                padding: "0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+            [theme.breakpoints.between(0, "sm")]: {
+                paddingLeft: "0px",
+                paddingRight: "0px",
             },
         },
         cardContainer: {
@@ -265,6 +278,14 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingBottom: "15px",
             display: "flex",
             flexDirection: "row",
+            [theme.breakpoints.between(0, "sm")]: {
+                justifyContent: "center",
+            },
+            [theme.breakpoints.between(0, "xs")]: {
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+            },
         },
         card: {
             width: "180px",
@@ -283,9 +304,11 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         signUpHeader: {
             marginTop: "20px",
-            width: "450px",
             padding: "0",
             margin: "0",
+            [theme.breakpoints.between(0, "sm")]: {
+                width: "90%",
+            },
         },
         descContainer: {
             padding: "20px",
@@ -321,10 +344,9 @@ const useStyles = makeStyles((theme: Theme) =>
         signUpForm: {
             marginBottom: "100px",
             padding: "0",
-            [theme.breakpoints.down("sm")]: {
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+
+            [theme.breakpoints.between(0, "sm")]: {
+                width: "90%",
             },
         },
     })

@@ -53,7 +53,7 @@ const EventSignUp: React.FC<Props> = ({ id, groupSignUp }) => {
         // error check response
         if (response) {
             if (response.success) {
-                await router.push("/");
+                await router.push(urls.pages.index);
             } else {
                 setError(response?.message || errors.GENERIC_ERROR);
             }
@@ -182,7 +182,6 @@ const useStyles = makeStyles((theme: Theme) =>
             padding: "0",
             margin: "0",
             flexDirection: "column",
-            width: "450px",
         },
         textWrapper: {
             paddingBottom: "20px",

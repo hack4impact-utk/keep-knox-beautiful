@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NextPage, NextPageContext } from "next";
 import Router from "next/router";
-import { Event, Volunteer, EventVolunteer, PaginatedVolunteers, APIError } from "utils/types";
+import { Event, Volunteer, EventVolunteer, PaginatedVolunteers, ApiResponse } from "utils/types";
 import UpsertEvent from "src/components/UpsertEvent";
 import { getEvent, getEventVolunteers } from "server/actions/Event";
 import {
@@ -53,10 +53,8 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
         const r = await fetch(`${urls.api.eventVolunteers(event._id!, page)}&search=${query}`, {
             method: "GET",
         });
-        /* eslint-disable */
-        const response = await r.json();
-        const newVolsData: PaginatedVolunteers = response.payload;
-        /* eslint-enable */
+        const response = (await r.json()) as ApiResponse;
+        const newVolsData: PaginatedVolunteers = response.payload as PaginatedVolunteers;
 
         setVols(newVolsData.volunteers);
     }
@@ -69,10 +67,9 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
         if (Math.floor(r.status / 100) !== 2) {
             alert(`ERROR: ${r.status}, ${r.statusText}`);
         }
-        /* eslint-disable */
-        const response = await r.json();
-        const newVolsData: PaginatedVolunteers = response.payload;
-        /* eslint-enable */
+
+        const response = (await r.json()) as ApiResponse;
+        const newVolsData: PaginatedVolunteers = response.payload as PaginatedVolunteers;
         if (newVolsData === undefined) {
             setIsLastPage(true);
         } else {
@@ -93,23 +90,23 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
 
     const createAndRegisterVol = async function (vol: Volunteer) {
         try {
-            const response = await fetch(`${urls.baseUrl}${urls.api.eventQuickadd(event._id!)}`, {
+            const r = await fetch(`${urls.baseUrl}${urls.api.eventQuickadd(event._id!)}`, {
                 method: "POST",
                 body: JSON.stringify({
                     ...vol,
                 }),
             });
-            const responseJSON = (await response.json()) as { success: boolean; payload: unknown };
+            const response = (await r.json()) as ApiResponse;
 
-            if (responseJSON.success) {
+            if (response.success) {
                 setOpen(false);
             } else {
-                alert("ERROR creating vol");
+                alert("Error: Unexpected error when creating volunteer.");
             }
             setOpen(false);
         } catch (e) {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            alert(`ERROR: ${e}`);
+            alert(`Error: ${e}`);
             console.error(e);
         }
     };
@@ -263,11 +260,17 @@ const useStyles = makeStyles((theme: Theme) => {
 export async function getServerSideProps(context: NextPageContext) {
     // get eventId from url by using context
     const eventId = context.query.eventId as string;
-    const event = await getEvent(eventId);
 
     // this func is run on server-side, so we can safely fetch the event directly
     try {
-        const volsObj = await getEventVolunteers(eventId, 1);
+        const eventPromise = getEvent(eventId);
+        const volsObjPromise = getEventVolunteers(eventId, 1);
+        const [event, volsObj] = await Promise.all([eventPromise, volsObjPromise]);
+
+        if (!event) {
+            throw new Error("Event not found.");
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const paginatedVols: PaginatedVolunteers = JSON.parse(JSON.stringify(volsObj));
 
@@ -280,10 +283,7 @@ export async function getServerSideProps(context: NextPageContext) {
         };
     } catch (e) {
         return {
-            props: {
-                event: event,
-                vols: [],
-            },
+            notFound: true,
         };
     }
 }

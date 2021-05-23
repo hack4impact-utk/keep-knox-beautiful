@@ -6,10 +6,7 @@ import { useRouter } from "next/router";
 // components
 import { Box, Grid } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
-import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -21,6 +18,9 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import RoomOutlinedIcon from "@material-ui/icons/RoomOutlined";
 import ScheduleOutlinedIcon from "@material-ui/icons/ScheduleOutlined";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 // misc
 import { Event, ApiResponse } from "utils/types";
@@ -61,12 +61,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
         event.endDate as Date
     ).getMinutes()}`.slice(-2)} ${new Date(event.endDate as Date).getHours() > 11 ? "PM" : "AM"}`;
 
-    const eventCaptionLength = 40;
-    const eventCaption =
-        event.caption!.length <= eventCaptionLength
-            ? event.caption
-            : event.caption!.slice(0, eventCaptionLength - 3) + "...";
-
     // state
     const [hover, setHover] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -81,7 +75,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
         event.stopPropagation();
         setAnchorEl(event.currentTarget);
         setMenuOpen(true);
-        console.log(event.currentTarget, anchorEl);
     };
 
     const handleClose = () => {
@@ -192,12 +185,21 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                     style={{ top: "50px" }}
                 >
                     <Link href={urls.pages.updateEvent(event._id!)}>
-                        <MenuItem onClick={handleClose}>Edit</MenuItem>
+                        <MenuItem onClick={handleClose}>
+                            {" "}
+                            <EditIcon /> &nbsp; Edit{" "}
+                        </MenuItem>
                     </Link>
                     <Link href={urls.pages.manageEvent(event._id!)}>
-                        <MenuItem onClick={handleClose}>Manage</MenuItem>
+                        <MenuItem onClick={handleClose}>
+                            {" "}
+                            <PersonOutlineIcon /> &nbsp; Manage{" "}
+                        </MenuItem>
                     </Link>
-                    <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                    <MenuItem onClick={handleDelete}>
+                        {" "}
+                        <DeleteIcon /> &nbsp; Delete{" "}
+                    </MenuItem>
                 </Menu>
             </React.Fragment>
         );
@@ -218,12 +220,11 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                 onMouseLeave={e => handleHoverLeave(e)}
                 onClick={() => {
                     handleLoading();
-                    void router.push(`/events/${event._id as string}`);
+                    void router.push(urls.pages.event(event._id || ""));
                 }}
                 className={`${classes.eventCard} ${loading ? classes.cardLoading : ""}`}
                 elevation={hover ? 20 : 7}
             >
-                {/* <CardActionArea> */}
                 <EventThumbnail localHover={hover}>
                     <Box className={classes.eventDate}>
                         <span>
@@ -245,7 +246,7 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                     ) : null}
                 </EventThumbnail>
                 <CardContent>
-                    <div style={{ height: 105, overflow: "hidden" }}>
+                    <div style={{ height: 100, overflow: "hidden" }}>
                         <CoreTypography gutterBottom variant="h3" className={classes.title} id="eventName">
                             {event.name}
                         </CoreTypography>
@@ -256,8 +257,9 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                                 fontFamily: "Ubuntu",
                             }}
                             id="eventDesc"
+                            noWrap
                         >
-                            {eventCaption}
+                            {event.caption}
                         </CoreTypography>
                     </div>
                     {/* location and time info */}
@@ -267,9 +269,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                             <CoreTypography
                                 variant="caption"
                                 style={{
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
                                     color: colors.pink,
                                     fontWeight: 600,
                                     fontFamily: "Ubuntu",
@@ -277,6 +276,7 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                                 }}
                                 id="eventLoc"
                                 component="p"
+                                noWrap
                             >
                                 {eventLocation}
                             </CoreTypography>
@@ -302,7 +302,6 @@ const EventCard: React.FC<Props> = ({ event, isAdmin = false, onLoading, loading
                         </Grid>
                     </Grid>
                 </CardContent>
-                {/* </CardActionArea> */}
             </Card>
         </React.Fragment>
     );

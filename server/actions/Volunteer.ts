@@ -32,15 +32,6 @@ export const getVolunteer = async function (id: string) {
     return vol;
 };
 
-export const getVolunteersForAdmin = async function () {
-    await mongoDB();
-
-    // TODO: add admin guard
-    const vols = (await VolunteerSchema.find()) as Volunteer[];
-
-    return vols;
-};
-
 /**
  * @param page Since this data is paginated, page is used to return a certain subset of the data.
  * @param search Optional parameter used to search volunteers by name.
@@ -232,11 +223,8 @@ export const markVolunteerPresent = async function (volId: string, eventId: stri
         volunteer.registeredEvents?.indexOf(event?._id) === -1 ||
         event.registeredVolunteers?.indexOf(volunteer?._id) === -1
     ) {
-        // could be a effed up case?
-        // throw new APIError(500, "The volunteer is not registered for this event.");
+        throw new APIError(500, "The volunteer is not registered for this event.");
     }
-
-    console.log(volId, eventId);
 
     const volPromise = VolunteerSchema.findByIdAndUpdate(volId, {
         $push: { attendedEvents: eventId },
