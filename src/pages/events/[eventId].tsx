@@ -106,7 +106,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
         } else {
             return (
                 <Container>
-                    <CoreTypography variant="body1" style={{ paddingTop: "30px" }}>
+                    <CoreTypography variant="body1" className={styles.noSignUpText}>
                         Signing up is not required for this event.
                     </CoreTypography>
                 </Container>
@@ -344,9 +344,15 @@ const useStyles = makeStyles((theme: Theme) =>
         signUpForm: {
             marginBottom: "100px",
             padding: "0",
-
             [theme.breakpoints.between(0, "sm")]: {
                 width: "90%",
+            },
+        },
+        noSignUpText: {
+            paddingTop: "30px",
+            [theme.breakpoints.between(0, "sm")]: {
+                paddingTop: "20px",
+                paddingBottom: "50px",
             },
         },
     })
