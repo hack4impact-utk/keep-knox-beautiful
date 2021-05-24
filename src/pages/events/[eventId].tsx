@@ -37,7 +37,6 @@ const EventPage: NextPage<Props> = ({ event }) => {
                         justifyContent: "center",
                         backgroundColor: theme.palette.secondary.main,
                         width: "90%",
-                        height: "30%",
                         minHeight: "250px",
                     }}
                 >
