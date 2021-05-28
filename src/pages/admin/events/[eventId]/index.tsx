@@ -230,7 +230,6 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
                                             volunteer: vol,
                                             present: i >= numReg,
                                         };
-                                        console.log(evol);
                                         return (
                                             <TableRow className={styles.tr} key={i}>
                                                 <VolAttendanceListItem
