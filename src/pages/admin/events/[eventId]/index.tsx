@@ -83,6 +83,7 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
             setVols(newVolsData.volunteers);
             setNumReg(newVolsData.registeredCount);
         }
+        console.log(newVolsData, page);
         setWorking(false);
     }
 
@@ -104,6 +105,7 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
         } else {
             setVols(vols.concat(newVolsData.volunteers));
             setNumReg(newVolsData.registeredCount);
+            setPage(newPage); // set new page if successful
         }
         setWorking(false);
         // setIsLastPage(newVolsData.isLastPage);
@@ -116,7 +118,6 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
     };
     const handleLoadMore = async () => {
         await getVolsForPage(page + 1);
-        setPage(page + 1);
     };
 
     const createAndRegisterVol = async function (vol: Volunteer) {
@@ -226,20 +227,21 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
                                 </TableHead>
                                 <TableBody>
                                     {vols.map((vol, i) => {
-                                        const evol: EventVolunteer = {
+                                        const ev: EventVolunteer = {
                                             volunteer: vol,
                                             present: i >= numReg,
                                         };
-                                        console.log(evol);
+                                        // console.log(numReg);
                                         return (
                                             <TableRow className={styles.tr} key={i}>
                                                 <VolAttendanceListItem
                                                     eventId={event._id!}
-                                                    eVol={evol}
+                                                    eVol={ev}
                                                     refreshFunc={async () => {
                                                         // refresh the table
                                                         setWorking(true);
                                                         await refreshVols();
+                                                        setWorking(false);
                                                     }}
                                                 />
                                             </TableRow>
