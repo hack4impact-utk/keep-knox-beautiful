@@ -94,7 +94,7 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
             method: "GET",
         });
         if (Math.floor(r.status / 100) !== 2) {
-            alert(`ERROR: ${r.status}, ${r.statusText}`);
+            alert(`Error: ${r.status}, ${r.statusText}`);
         }
 
         const response = (await r.json()) as ApiResponse;
@@ -219,9 +219,11 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
                             <Table aria-label="volunteer table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={{ fontWeight: "bold" }}>Volunteers</TableCell>
+                                        <TableCell style={{ fontWeight: "bold" }}>
+                                            <CoreTypography variant="h3">Volunteers</CoreTypography>
+                                        </TableCell>
                                         <TableCell style={{ fontWeight: "bold" }} align="right">
-                                            Present
+                                            <CoreTypography variant="h3">Present</CoreTypography>
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
