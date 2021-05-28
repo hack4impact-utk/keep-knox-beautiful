@@ -6,21 +6,20 @@ import urls from "utils/urls";
 interface Props {
     eventId: string;
     eVol: EventVolunteer;
+    refreshFunc(): void;
 }
 
-const VolAttendanceListItem: React.FC<Props> = ({ eventId, eVol }) => {
-    const [present, setPresent] = useState(eVol.present);
-
+const VolAttendanceListItem: React.FC<Props> = ({ eventId, eVol, refreshFunc }) => {
     const toggleAttendance = async function () {
         const fetchOpts: RequestInit = {
             method: "POST",
             mode: "same-origin",
         };
-        if (present) {
+        if (eVol.present) {
             const resp = await fetch(urls.baseUrl + urls.api.markNotPresent(eventId, eVol.volunteer._id!), fetchOpts);
             const response = (await resp.json()) as ApiResponse;
             if (resp.status == 200) {
-                setPresent(false);
+                refreshFunc();
             } else {
                 alert(`Error: ${response.message || "Unexpected error."}`);
             }
@@ -28,7 +27,7 @@ const VolAttendanceListItem: React.FC<Props> = ({ eventId, eVol }) => {
             const resp = await fetch(urls.baseUrl + urls.api.markPresent(eventId, eVol.volunteer._id!), fetchOpts);
             const response = (await resp.json()) as ApiResponse;
             if (resp.status == 200) {
-                setPresent(true);
+                refreshFunc();
             } else {
                 alert(`Error: ${response.message || "Unexpected error."}`);
             }
@@ -40,7 +39,7 @@ const VolAttendanceListItem: React.FC<Props> = ({ eventId, eVol }) => {
             <TableCell align="right">
                 <Switch
                     onClick={toggleAttendance}
-                    checked={present}
+                    checked={eVol.present}
                     name="presentSwitch"
                     inputProps={{ "aria-label": "secondary checkbox" }}
                 />
