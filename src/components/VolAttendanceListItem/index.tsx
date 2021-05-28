@@ -25,6 +25,7 @@ const VolAttendanceListItem: React.FC<Props> = ({ eventId, eVol, refreshFunc }) 
                 </Button>
             );
         }
+
         if (eVol.present) {
             return (
                 <Button onClick={toggleAttendance} className={styles.checkedBox}>

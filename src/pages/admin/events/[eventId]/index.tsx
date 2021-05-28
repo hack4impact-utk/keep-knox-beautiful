@@ -53,21 +53,23 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
 
     // helper func to get the vols by search query
     async function getVolsFromSearch(query: string) {
-        setWorking(true);
+        setPage(1);
         const r = await fetch(`${urls.api.eventVolunteers(event._id!, page)}&search=${query}`, {
             method: "GET",
         });
         const response = (await r.json()) as ApiResponse;
         const newVolsData: PaginatedVolunteers = response.payload as PaginatedVolunteers;
 
+        // reset
         setVols(newVolsData.volunteers);
         setNumReg(newVolsData.registeredCount);
+        setIsLastPage(vols.length < 5);
         setWorking(false);
     }
 
     async function refreshVols() {
         setWorking(true);
-        const r = await fetch(`${urls.api.eventVolunteers(event._id!, page)}&search=${search}`, {
+        const r = await fetch(`${urls.api.eventVolunteers(event._id!, 1)}&search=${search}`, {
             method: "GET",
         });
         if (Math.floor(r.status / 100) !== 2) {
@@ -81,16 +83,21 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
             setIsLastPage(true);
         } else {
             setVols(newVolsData.volunteers);
+            setPage(1);
             setNumReg(newVolsData.registeredCount);
+            setIsLastPage(vols.length < 5);
         }
-        console.log(newVolsData, page);
         setWorking(false);
     }
 
-    // helper func to get the vols for a certain page
-    async function getVolsForPage(newPage: number) {
+    const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(event.target.value);
+        setPage(1);
+        await getVolsFromSearch(event.target.value);
+    };
+    const handleLoadMore = async () => {
         setWorking(true);
-        const r = await fetch(`${urls.api.eventVolunteers(event._id!, newPage)}&search=${search}`, {
+        const r = await fetch(`${urls.api.eventVolunteers(event._id!, page + 1)}&search=${search}`, {
             method: "GET",
         });
         if (Math.floor(r.status / 100) !== 2) {
@@ -103,21 +110,12 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
         if (!newVolsData || newVolsData.volunteers.length === 0) {
             setIsLastPage(true);
         } else {
-            setVols(vols.concat(newVolsData.volunteers));
-            setNumReg(newVolsData.registeredCount);
-            setPage(newPage); // set new page if successful
+            setPage(page + 1);
+            setVols(vols.concat(newVolsData.volunteers)); // join arrays
+            setNumReg(newVolsData.registeredCount + numReg); // add reg nums
+            setIsLastPage(vols.length < 5);
         }
         setWorking(false);
-        // setIsLastPage(newVolsData.isLastPage);
-    }
-
-    const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(event.target.value);
-        setPage(1);
-        await getVolsFromSearch(event.target.value);
-    };
-    const handleLoadMore = async () => {
-        await getVolsForPage(page + 1);
     };
 
     const createAndRegisterVol = async function (vol: Volunteer) {
