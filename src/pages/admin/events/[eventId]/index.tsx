@@ -73,7 +73,7 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
             method: "GET",
         });
         if (Math.floor(r.status / 100) !== 2) {
-            alert(`ERROR: ${r.status}, ${r.statusText}`);
+            alert(`Error: ${r.status}, ${r.statusText}`);
         }
 
         const response = (await r.json()) as ApiResponse;
