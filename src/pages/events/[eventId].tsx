@@ -14,6 +14,7 @@ import LocationOnIcon from "@material-ui/icons/LocationOn";
 import { isSameDay, format, isBefore } from "date-fns";
 import EventSignUp from "src/components/EventSignUp";
 import theme from "utils/theme";
+import React from "react";
 
 interface Props {
     event: Event;
@@ -124,7 +125,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
     };
 
     return (
-        <>
+        <React.Fragment>
             <Container maxWidth="xl" className={styles.eventHeader}>
                 <img
                     src={`/${constants.org.images.logo}`}
@@ -181,7 +182,7 @@ const EventPage: NextPage<Props> = ({ event }) => {
                     {getSignUpDisplay()}
                 </Container>
             </Container>
-        </>
+        </React.Fragment>
     );
 };
 

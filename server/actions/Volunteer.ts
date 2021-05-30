@@ -37,9 +37,9 @@ export const getVolunteer = async function (id: string) {
  * @param search Optional parameter used to search volunteers by name.
  * @returns A limited number of volunteers in a LoadMorePaginatedData type.
  */
-export const getVolunteers = async function (page: number, search = "") {
+export const getVolunteers = async function (page: number, search = "", itemsPerPage = 5) {
     await mongoDB();
-    const VOLS_PER_PAGE = 10;
+    const VOLS_PER_PAGE = itemsPerPage;
 
     // error check page and set it to be offset from 0 (1st page will return the 0th offset of data)
     if (isNaN(page) || page < 1) {
@@ -57,9 +57,15 @@ export const getVolunteers = async function (page: number, search = "") {
         .limit(VOLS_PER_PAGE + 1);
     // +1 in limit() to see if this is the last page
 
+    const totalItems = await VolunteerSchema.find(
+        { name: { $regex: `.*${escapeRegExp(search)}.*`, $options: "i" } },
+        VOL_FIELDS
+    ).count();
+
     return {
         data: vols.slice(0, VOLS_PER_PAGE),
         isLastPage: vols.length < VOLS_PER_PAGE + 1,
+        totalItems: totalItems,
     } as LoadMorePaginatedData;
 };
 

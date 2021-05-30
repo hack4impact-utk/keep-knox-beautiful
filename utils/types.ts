@@ -39,10 +39,12 @@ export interface Admin {
 export interface PaginatedVolunteers {
     volunteers: Volunteer[];
     registeredCount: number;
+    totalItems?: number;
 }
 export interface LoadMorePaginatedData {
     data: (Event | Volunteer)[];
     isLastPage: boolean;
+    totalItems?: number; // used for the kkb table component
 }
 
 export interface ContentfulImage {

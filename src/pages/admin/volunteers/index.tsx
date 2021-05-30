@@ -14,28 +14,37 @@ import {
     TextField,
     InputAdornment,
 } from "@material-ui/core";
-import { Search } from "@material-ui/icons";
+import { Menu, More, Search } from "@material-ui/icons";
 import { GetStaticPropsContext, NextPage, NextPageContext } from "next";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getVolunteers } from "server/actions/Volunteer";
 import colors from "src/components/core/colors";
 import constants from "utils/constants";
 import { Volunteer, LoadMorePaginatedData, ApiResponse } from "utils/types";
 import urls from "utils/urls";
 import InfiniteScroll from "react-infinite-scroll-component";
+import KKBTable from "src/components/KKBTable";
+import { useRouter } from "next/router";
 
 interface Props {
-    volsProps: Volunteer[];
-    isLastPageProps: boolean;
+    pageVols: LoadMorePaginatedData;
 }
 
-const VolunteersPage: NextPage<Props> = ({ volsProps, isLastPageProps }) => {
+const VolunteersPage: NextPage<Props> = ({ pageVols }) => {
     const styles = useStyles();
     const [search, setSearch] = useState("");
-    const [vols, setVols] = useState<Volunteer[]>(volsProps);
+    const [vols, setVols] = useState<Volunteer[]>(pageVols.data);
     const [page, setPage] = useState<number>(1);
-    const [isLastPage, setIsLastPage] = useState<boolean>(isLastPageProps);
+    const [isLastPage, setIsLastPage] = useState<boolean>(pageVols.isLastPage);
+    const [totalItems, setTotalItems] = useState(pageVols.totalItems ?? 1);
+
+    // update state on props change
+    useEffect(() => {
+        setVols(pageVols.data);
+        setTotalItems(pageVols.totalItems);
+        setIsLastPage(pageVols.isLastPage);
+    }, [pageVols]);
 
     // helper func to get the vols by search query
     async function getVolsFromSearch(query: string) {
@@ -73,31 +82,9 @@ const VolunteersPage: NextPage<Props> = ({ volsProps, isLastPageProps }) => {
 
     return (
         <Container maxWidth="xl" className={styles.container}>
-            <Grid container direction="row" justify="center">
-                <Grid item xs={10} md={8} lg={6}>
-                    <Grid container direction="row" justify="flex-end">
-                        <TextField
-                            variant="outlined"
-                            label="Search"
-                            margin="dense"
-                            size="small"
-                            style={{ margin: 30 }}
-                            color="secondary"
-                            onChange={handleSearchChange}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Search />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid>
-                </Grid>
-            </Grid>
             <Grid container direction="row" spacing={6} justify="center">
-                <Grid item xs={10} md={8} lg={6}>
-                    <InfiniteScroll
+                <Grid item xs={12} md={10} lg={8}>
+                    {/* <InfiniteScroll
                         dataLength={vols.length}
                         next={handleLoadMore}
                         hasMore={!isLastPage}
@@ -125,7 +112,20 @@ const VolunteersPage: NextPage<Props> = ({ volsProps, isLastPageProps }) => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                    </InfiniteScroll>
+                    </InfiniteScroll> */}
+                    <KKBTable name="Volunteers" colnames={["Name", "Email", ""]} numItems={totalItems} searchable>
+                        {vols.map(vol => (
+                            <Link href={urls.pages.volunteer(vol._id!)} passHref key={vol._id}>
+                                <TableRow className={styles.tr} hover>
+                                    <TableCell>{vol.name}</TableCell>
+                                    <TableCell>{vol.email}</TableCell>
+                                    <TableCell>
+                                        <Menu />
+                                    </TableCell>
+                                </TableRow>
+                            </Link>
+                        ))}
+                    </KKBTable>
                 </Grid>
             </Grid>
         </Container>
@@ -151,15 +151,14 @@ export async function getServerSideProps(context: NextPageContext) {
             context.res?.end();
         }
 
-        const volsData: LoadMorePaginatedData = await getVolunteers(1);
+        const volsData: LoadMorePaginatedData = await getVolunteers(context.query.p ?? 1, context.query.q);
         if (!volsData) {
             throw new Error("Error fetching volunteer data.");
         }
 
         return {
             props: {
-                volsProps: JSON.parse(JSON.stringify(volsData.data)) as Volunteer[],
-                isLastPageProps: volsData.isLastPage,
+                pageVols: JSON.parse(JSON.stringify(volsData)),
             },
         };
     } catch (error) {

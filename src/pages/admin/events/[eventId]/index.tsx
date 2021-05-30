@@ -35,6 +35,7 @@ import VolQuickAddDialog from "src/components/VolQuickAddDialog";
 import InfiniteScroll from "react-infinite-scroll-component";
 import constants from "utils/constants";
 import AddIcon from "@material-ui/icons/Add";
+import KKBTable from "src/components/KKBTable";
 
 interface Props {
     event: Event;
@@ -185,28 +186,8 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
                 </Grid>
             </div>
             <Grid container direction="row" justify="center">
-                <Grid item xs={12} lg={9}>
-                    <Grid container direction="row" justify="flex-end">
-                        <TextField
-                            variant="outlined"
-                            label="Search"
-                            margin="dense"
-                            size="small"
-                            style={{ margin: 30 }}
-                            color="secondary"
-                            onChange={handleSearchChange}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Search />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid>
-                </Grid>
                 <Grid item xs={10} sm={8} md={6} lg={5}>
-                    <InfiniteScroll
+                    {/* <InfiniteScroll
                         dataLength={vols.length}
                         next={handleLoadMore}
                         hasMore={!isLastPage}
@@ -249,7 +230,34 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                    </InfiniteScroll>
+                    </InfiniteScroll> */}
+                    <KKBTable
+                        name="Event Volunteers"
+                        colnames={["Volunteer", "Attendance"]}
+                        numItems={event.volunteerCount ?? 1}
+                        searchable
+                    >
+                        {vols.map((vol, i) => {
+                            const ev: EventVolunteer = {
+                                volunteer: vol,
+                                present: i >= numReg,
+                            };
+                            return (
+                                <TableRow className={styles.tr} key={i}>
+                                    <VolAttendanceListItem
+                                        eventId={event._id!}
+                                        eVol={ev}
+                                        refreshFunc={async () => {
+                                            // refresh the table
+                                            setWorking(true);
+                                            await refreshVols();
+                                            setWorking(false);
+                                        }}
+                                    />
+                                </TableRow>
+                            );
+                        })}
+                    </KKBTable>
                 </Grid>
             </Grid>
             <VolQuickAddDialog
