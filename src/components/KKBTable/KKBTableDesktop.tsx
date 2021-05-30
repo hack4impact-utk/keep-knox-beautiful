@@ -64,11 +64,12 @@ const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         kkbTable: {},
         kkbTableContainer: {
-            maxHeight: 500,
+            maxHeight: 460,
         },
 
         kkbTableBody: {
             display: "block",
+            height: 460,
             overflowY: "scroll",
         },
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NextPage, NextPageContext } from "next";
 import Router from "next/router";
 import { Event, Volunteer, EventVolunteer, PaginatedVolunteers, ApiResponse } from "utils/types";
@@ -51,6 +51,13 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
     const [page, setPage] = useState<number>(1);
     const [isLastPage, setIsLastPage] = useState<boolean>(vols.length < 5); // vols per page const
     const [working, setWorking] = useState(false);
+    const [totalItems, setTotalItems] = useState<number>();
+
+    useEffect(() => {
+        setVols(pageVols.volunteers);
+        setNumReg(pageVols.registeredCount);
+        setTotalItems(pageVols.totalItems);
+    }, [pageVols]);
 
     // helper func to get the vols by search query
     async function getVolsFromSearch(query: string) {
@@ -186,7 +193,7 @@ const ManageVolunteers: NextPage<Props> = ({ pageVols, event }) => {
                 </Grid>
             </div>
             <Grid container direction="row" justify="center">
-                <Grid item xs={10} sm={8} md={6} lg={5}>
+                <Grid item xs={12} sm={10} md={8}>
                     {/* <InfiniteScroll
                         dataLength={vols.length}
                         next={handleLoadMore}
@@ -324,7 +331,7 @@ export async function getServerSideProps(context: NextPageContext) {
     // this func is run on server-side, so we can safely fetch the event directly
     try {
         const eventPromise = getEvent(eventId);
-        const volsObjPromise = getEventVolunteers(eventId, 1);
+        const volsObjPromise = getEventVolunteers(eventId, parseInt(context.query.p ?? "1"), context.query.q);
         const [event, volsObj] = await Promise.all([eventPromise, volsObjPromise]);
 
         if (!event) {
