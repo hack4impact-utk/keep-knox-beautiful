@@ -51,10 +51,12 @@ export const getAttendedCount = async function (id: string) {
         throw new APIError(400, "Invalid id");
     }
 
-    const event = await EventSchema.findById(id);
+    const event = await EventSchema.findById(id, { attendedVolunteers: 1, _id: 0 });
     if (!event) {
         throw new APIError(404, "Event does not exist");
     }
+
+    console.log(event);
 
     return event.attendedVolunteers?.length;
 };
