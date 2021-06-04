@@ -56,8 +56,6 @@ export const getAttendedCount = async function (id: string) {
         throw new APIError(404, "Event does not exist");
     }
 
-    console.log(event);
-
     return event.attendedVolunteers?.length;
 };
 
